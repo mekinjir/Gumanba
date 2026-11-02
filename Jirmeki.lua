@@ -1,0 +1,1023 @@
+--[[ Obfuscate By mekinjir (Safe Mode) ]]--
+local function _0xJUNK0() local a=0 for i=1,179 do a=a+i end return a end
+local function _0xJUNK1() local a=0 for i=1,234 do a=a+i end return a end
+local function _0xJUNK2() local a=0 for i=1,159 do a=a+i end return a end
+local _0x0000 = game:GetService("Players")
+local _0x0001 = game:GetService("UserInputService")
+local _0x0002 = game:GetService("RunService")
+local _0x0003 = game:GetService("TweenService")
+local _0x0004 = game:GetService("HttpService")
+local _0x0005 = game:GetService("VirtualUser")
+local _0x0006 = game:GetService("MarketplaceService")
+local _0x0007 = _0x0000.LocalPlayer
+local _0x0008 = ((getgenv and getgenv()) or _G)
+if _0x0008.MekiHub_Cleanup then
+end
+local _0x0009 = false
+local _0x000A = {}
+local function _0x000B(_0x000C)
+return _0x000C
+end
+local _0x000D = {Bg = Color3.fromRGB(0x12, 0x12, 0x18), Topbar = Color3.fromRGB(0x18, 0x18, 0x20), Sidebar = Color3.fromRGB(0x15, 0x15, 0x1c), Panel = Color3.fromRGB(0x1e, 0x1e, 0x28), PanelHover = Color3.fromRGB(0x26, 0x26, 0x34), PanelLite = Color3.fromRGB(0x28, 0x28, 0x38), Track = Color3.fromRGB(0xe, 0xe, 0x14), Stroke = Color3.fromRGB(0x37, 0x37, 0x4b), Accent = Color3.fromRGB(0x0, 0xd2, 0xff), AccentDark = Color3.fromRGB(0x0, 0x93, 0xb2), Text = Color3.fromRGB(0xff, 0xff, 0xff), SubText = Color3.fromRGB(0x9b, 0xa5, 0xbc), Danger = Color3.fromRGB(0xff, 0x4b, 0x4b), Success = Color3.fromRGB(0x46, 0xdc, 0x8c)}
+local _0x000E = Enum.Font.GothamMedium
+local _0x000F = Enum.Font.GothamBold
+local _0x0010 = {{"Cyan", Color3.fromRGB(0x0, 0xd2, 0xff)}, {"Ungu", Color3.fromRGB(0xa0, 0x6e, 0xff)}, {"Hijau", Color3.fromRGB(0x46, 0xdc, 0x8c)}, {"Pink", Color3.fromRGB(0xff, 0x64, 0xb4)}, {"Orange", Color3.fromRGB(0xff, 0x96, 0x3c)}}
+local _0x0011 = "meki_hub_theme.txt"
+local function _0x0012(_0x0013, _0x0014)
+return Color3.new((_0x0013.R * _0x0014), (_0x0013.G * _0x0014), (_0x0013.B * _0x0014))
+end
+local function _0x0015()
+return (((type(writefile) == "function") and (type(readfile) == "function")) and (type(isfile) == "function"))
+end
+local _0x0016 = "Cyan"
+local _0x0017, _0x0018, _0x0019 = 0x21c, 0x168, 0x84
+local _0x001A = 0x1
+local _0x001B = {}
+local _0x001C = {}
+local _0x001D = {}
+local _0x001E
+local function _0x001F(_0x0020, _0x0021, _0x0022)
+local _0x0023 = Instance.new(_0x0020)
+for _0x0024, _0x0025 in pairs((_0x0021 or {})) do
+_0x0023[_0x0024] = _0x0025
+if (typeof(_0x0025) == "Color3") then
+if (_0x0025 == _0x000D.Accent) then
+elseif (_0x0025 == _0x000D.AccentDark) then
+end
+end
+end
+if _0x0022 then
+_0x0023.Parent = _0x0022
+end
+return _0x0023
+end
+local function _0x0026(_0x0027)
+local _0x0028, _0x0029, _0x0025 = _0x000D.Accent:ToHSV()
+local _0x002A = Color3.fromHSV(((_0x0028 + 0.09) % 0x1), _0x0029, _0x0025)
+if (_0x0027 == "loop") then
+return ColorSequence.new({ColorSequenceKeypoint.new(0x0, _0x000D.Accent), ColorSequenceKeypoint.new(0.5, _0x002A), ColorSequenceKeypoint.new(0x1, _0x000D.Accent)})
+elseif (_0x0027 == "topbar") then
+return ColorSequence.new(_0x000D.Topbar:Lerp(_0x000D.Accent, 0.12), _0x000D.Topbar)
+elseif (_0x0027 == "card") then
+return ColorSequence.new(_0x000D.Panel:Lerp(_0x000D.Accent, 0.2), _0x000D.Panel)
+end
+return ColorSequence.new(_0x000D.Accent, _0x002A)
+end
+local function _0x002B(_0x0022, _0x0027, _0x002C)
+local _0x002D = _0x001F("UIGradient", {Color = _0x0026(_0x0027), Rotation = (_0x002C or 0x0)}, _0x0022)
+return _0x002D
+end
+local function _0x002E(_0x0023, _0x002F)
+return _0x001F("UICorner", {CornerRadius = UDim.new(0x0, (_0x002F or 0x8))}, _0x0023)
+end
+local function _0x0030(_0x0023, _0x0031, _0x0032, _0x0033)
+return _0x001F("UIStroke", {Color = (_0x0031 or _0x000D.Stroke), Thickness = (_0x0032 or 0x1), Transparency = (_0x0033 or 0x0), ApplyStrokeMode = Enum.ApplyStrokeMode.Border}, _0x0023)
+end
+local function _0x0034(_0x0023, _0x0035, _0x0021)
+end
+local function _0x0036(_0x0037, ...)
+local _0x0038, _0x0039, _0x002A = pcall(_0x0037, ...)
+if (not _0x0038) then
+return nil
+end
+return _0x0039, _0x002A
+end
+local function _0x003A()
+local _0x0038, _0x003B = pcall(function ()
+return gethui()
+end)
+if (_0x0038 and _0x003B) then
+return _0x003B
+end
+return _0x0007:WaitForChild("PlayerGui")
+end
+local function _0x003C()
+local _0x003D = _0x0007.Character
+return (_0x003D and _0x003D:FindFirstChild("HumanoidRootPart"))
+end
+local function _0x003E()
+local _0x003F = _0x0007.Character
+local _0x0040 = (_0x003F and _0x003F:FindFirstChildOfClass("Humanoid"))
+if _0x0040 then
+end
+end
+local function _0x0041(_0x0042, _0x0043)
+local _0x0044, _0x0045, _0x0046, _0x0047
+local _0x0048 = false
+return function ()
+return _0x0048
+end
+end
+local _0x0049 = _0x001F("ScreenGui", {Name = "MekiHub_UI", ResetOnSpawn = false, IgnoreGuiInset = true, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, DisplayOrder = 0x3e7})
+_0x0049.Parent = _0x003A()
+_0x001E = function ()
+local _0x004A = {}
+for _0x004B, _0x004C in ipairs(_0x001B) do
+if _0x004C[0x1]:IsDescendantOf(_0x0049) then
+end
+end
+_0x001B = _0x004A
+local _0x004D = {}
+for _0x004B, _0x004C in ipairs(_0x001C) do
+if _0x004C[0x1]:IsDescendantOf(_0x0049) then
+end
+end
+_0x001C = _0x004D
+end
+local function _0x004E(_0x004F, _0x0031)
+_0x0016 = _0x004F
+_0x000D.Accent = _0x0031
+_0x000D.AccentDark = _0x0012(_0x0031, 0.7)
+for _0x004B, _0x004C in ipairs(_0x001B) do
+end
+for _0x004B, _0x004C in ipairs(_0x001C) do
+end
+for _0x004B, _0x0050 in ipairs(_0x001D) do
+end
+if _0x0015() then
+end
+end
+local function _0x0051(_0x0027, _0x0022)
+if (not _0x0027) then
+return nil
+end
+local _0x0052 = _0x001F("Frame", {Size = UDim2.fromOffset(0x12, 0x12), Position = UDim2.new(0x0, 0xa, 0.5, (- 0x9)), BackgroundTransparency = 0x1}, _0x0022)
+local _0x0053, _0x0054 = {}, {}
+local function _0x0055(_0x0056, _0x0057, _0x0058, _0x0028, _0x002F, _0x0059)
+local _0x0014 = _0x001F("Frame", {Position = UDim2.fromOffset(_0x0056, _0x0057), Size = UDim2.fromOffset(_0x0058, _0x0028), BackgroundColor3 = _0x000D.SubText, BorderSizePixel = 0x0, Rotation = (_0x0059 or 0x0)}, _0x0052)
+if _0x002F then
+end
+return _0x0014
+end
+if (_0x0027 == "home") then
+elseif (_0x0027 == "pin") then
+elseif (_0x0027 == "user") then
+elseif (_0x0027 == "eye") then
+local _0x005A = _0x001F("Frame", {Position = UDim2.fromOffset(0x3, 0x5), Size = UDim2.fromOffset(0xc, 0x8), BackgroundTransparency = 0x1, BorderSizePixel = 0x0}, _0x0052)
+local _0x005B = _0x001F("UIStroke", {Color = _0x000D.SubText, Thickness = 0x2, ApplyStrokeMode = Enum.ApplyStrokeMode.Border}, _0x005A)
+elseif (_0x0027 == "misc") then
+elseif (_0x0027 == "gear") then
+local _0x005A = _0x001F("Frame", {Position = UDim2.fromOffset(0x4, 0x4), Size = UDim2.fromOffset(0xa, 0xa), BackgroundTransparency = 0x1, BorderSizePixel = 0x0}, _0x0052)
+local _0x005B = _0x001F("UIStroke", {Color = _0x000D.SubText, Thickness = 0x2, ApplyStrokeMode = Enum.ApplyStrokeMode.Border}, _0x005A)
+end
+local _0x005C = {}
+function _0x005C.setColor(_0x0013)
+for _0x004B, _0x0014 in ipairs(_0x0053) do
+_0x0014.BackgroundColor3 = _0x0013
+end
+for _0x004B, _0x0029 in ipairs(_0x0054) do
+_0x0029.Color = _0x0013
+end
+end
+return _0x005C
+end
+local _0x005D = {}
+function _0x005D:CreateWindow(_0x005E)
+local _0x005F = {}
+local _0x0060 = {}
+local _0x0061 = {}
+_0x005F.SpinBorder = true
+local _0x0062 = {}
+_0x005F.Flags = _0x0062
+local _0x0063 = _0x001F("Frame", {Name = "Root", Size = UDim2.fromOffset(_0x0017, _0x0018), Position = UDim2.fromScale(0.5, 0.5), AnchorPoint = Vector2.new(0.5, 0.5), BackgroundTransparency = 0x1, Visible = false}, _0x0049)
+local _0x0064 = _0x001F("UIScale", {}, _0x0063)
+local _0x0065, _0x0066 = 0x1, false
+local function _0x0067()
+local _0x0068 = workspace.CurrentCamera
+if (not _0x0068) then
+return
+end
+local _0x0069 = _0x0068.ViewportSize
+_0x0065 = math.clamp(math.min(((_0x0069.X - 0x18) / _0x0017), ((_0x0069.Y - 0x18) / _0x0018)), 0.5, 0x1)
+if (not _0x0066) then
+_0x0064.Scale = _0x0065
+end
+end
+_0x005F.Root = _0x0063
+function _0x005F:IsVisible()
+return _0x0063.Visible
+end
+function _0x005F:SetVisible(_0x0025)
+if (_0x0066 or (_0x0025 == _0x0063.Visible)) then
+return
+end
+_0x0066 = true
+if _0x0025 then
+_0x0064.Scale = (_0x0065 * 0.9)
+_0x0063.Visible = true
+else
+end
+end
+function _0x005F:Toggle()
+end
+local _0x006A = _0x001F("Frame", {Name = "Main", Size = UDim2.fromScale(0x1, 0x1), BackgroundColor3 = _0x000D.Bg, BorderSizePixel = 0x0, ClipsDescendants = true}, _0x0063)
+local _0x006B = _0x0030(_0x006A, Color3.new(0x1, 0x1, 0x1), 1.5, 0.2)
+local _0x006C = _0x002B(_0x006B, "loop", 0x0)
+local _0x006D = _0x001F("Frame", {Size = UDim2.new(0x1, 0x0, 0x0, 0x2e), BackgroundColor3 = Color3.new(0x1, 0x1, 0x1), BorderSizePixel = 0x0}, _0x006A)
+local _0x006E = 0x10
+local _0x006F = _0x001F("Frame", {Size = UDim2.fromOffset(0x4e, 0x12), Position = UDim2.new(0x0, (_0x006E + 0x58), 0.5, (- 0x9)), BackgroundColor3 = Color3.new(0x1, 0x1, 0x1), BorderSizePixel = 0x0}, _0x006D)
+local _0x0070 = _0x001F("TextLabel", {Text = "-- FPS  |  -- ms", Font = _0x000F, TextSize = 0xb, TextColor3 = _0x000D.SubText, BackgroundTransparency = 0x1, AnchorPoint = Vector2.new(0x1, 0.5), Position = UDim2.new(0x1, (- 0x54), 0.5, 0x0), Size = UDim2.fromOffset(0x82, 0x12), TextXAlignment = Enum.TextXAlignment.Right}, _0x006D)
+_0x005F.StatsLabel = _0x0070
+local function _0x0071(_0x0072, _0x0073, _0x0074, _0x0075)
+local _0x002A = _0x001F("TextButton", {Text = _0x0072, Font = _0x000F, TextSize = _0x0073, TextColor3 = _0x000D.SubText, BackgroundColor3 = _0x000D.PanelLite, BackgroundTransparency = 0x1, AutoButtonColor = false, Size = UDim2.fromOffset(0x1c, 0x1c), Position = UDim2.new(0x1, _0x0074, 0.5, (- 0xe))}, _0x006D)
+return _0x002A
+end
+local _0x0076 = _0x0071("X", 0xc, (- 0x28), _0x000D.Danger)
+local _0x0077 = _0x0071("-", 0x14, (- 0x4a), _0x000D.PanelLite)
+local _0x0078 = _0x001F("Frame", {Position = UDim2.fromOffset(0x0, 0x2e), Size = UDim2.new(0x0, _0x0019, 0x1, (- 0x2e)), BackgroundColor3 = _0x000D.Sidebar, BorderSizePixel = 0x0}, _0x006A)
+local _0x0079 = _0x001F("Frame", {Size = UDim2.new(0x1, 0x0, 0x1, (- 0x38)), BackgroundTransparency = 0x1}, _0x0078)
+local _0x007A = _0x001F("Frame", {Position = UDim2.new(0x0, 0x0, 0x1, (- 0x34)), Size = UDim2.new(0x1, 0x0, 0x0, 0x34), BackgroundTransparency = 0x1}, _0x0078)
+local _0x007B = _0x001F("ImageLabel", {Size = UDim2.fromOffset(0x1e, 0x1e), Position = UDim2.fromOffset(0xa, 0xb), BackgroundColor3 = _0x000D.PanelLite, BorderSizePixel = 0x0}, _0x007A)
+local _0x007C = _0x0030(_0x007B, Color3.new(0x1, 0x1, 0x1), 1.5, 0x0)
+local _0x007D = _0x001F("Frame", {Position = UDim2.fromOffset(_0x0019, 0x2e), Size = UDim2.new(0x1, (- _0x0019), 0x1, (- 0x2e)), BackgroundTransparency = 0x1}, _0x006A)
+local _0x007E = _0x001F("Frame", {Size = UDim2.fromOffset(0x104, 0x190), AnchorPoint = Vector2.new(0x1, 0x0), Position = UDim2.new(0x1, (- 0xe), 0x0, 0xe), BackgroundTransparency = 0x1, ZIndex = 0xc8}, _0x0049)
+local _0x007F = 0x0
+function _0x005F:Notify(_0x0080, _0x0072, _0x0081, _0x0027)
+if _0x0009 then
+return
+end
+_0x007F = (_0x007F + 0x1)
+local _0x0031 = ((((_0x0027 == "error") and _0x000D.Danger) or ((_0x0027 == "success") and _0x000D.Success)) or _0x000D.Accent)
+local _0x0052 = _0x001F("Frame", {Size = UDim2.new(0x1, 0x0, 0x0, 0x36), BackgroundTransparency = 0x1, LayoutOrder = _0x007F}, _0x007E)
+local _0x0082 = _0x001F("Frame", {Size = UDim2.fromScale(0x1, 0x1), Position = UDim2.fromOffset(0x122, 0x0), BackgroundColor3 = _0x000D.Panel, BorderSizePixel = 0x0}, _0x0052)
+local _0x0083 = _0x001F("Frame", {Size = UDim2.new(0x0, 0x3, 0x1, (- 0x10)), Position = UDim2.fromOffset(0x8, 0x8), BackgroundColor3 = _0x0031, BorderSizePixel = 0x0}, _0x0082)
+end
+function _0x005F:Prompt(_0x0084, _0x0085, _0x0050, _0x0086)
+local _0x0087 = _0x001F("TextButton", {Text = "", AutoButtonColor = false, BackgroundColor3 = Color3.new(0x0, 0x0, 0x0), BackgroundTransparency = 0x1, Size = UDim2.fromScale(0x1, 0x1), ZIndex = 0x3c}, _0x0049)
+local _0x0088 = _0x001F("Frame", {Size = UDim2.fromOffset(0x118, 0x96), Position = UDim2.fromScale(0.5, 0.5), AnchorPoint = Vector2.new(0.5, 0.5), BackgroundColor3 = _0x000D.Panel, BorderSizePixel = 0x0}, _0x0087)
+local _0x0055 = _0x001F("TextBox", {Text = (_0x0085 or ""), Font = _0x000E, TextSize = 0xd, TextColor3 = _0x000D.Text, PlaceholderText = (_0x0086 or "Nama waypoint..."), PlaceholderColor3 = _0x000D.SubText, BackgroundColor3 = _0x000D.Track, BorderSizePixel = 0x0, ClearTextOnFocus = false, Position = UDim2.fromOffset(0x10, 0x2c), Size = UDim2.new(0x1, (- 0x20), 0x0, 0x24), TextXAlignment = Enum.TextXAlignment.Left}, _0x0088)
+local function _0x0089(_0x0072, _0x0058, _0x0074, _0x008A, _0x008B)
+local _0x002A = _0x001F("TextButton", {Text = _0x0072, Font = _0x000F, TextSize = 0xc, TextColor3 = _0x008B, BackgroundColor3 = _0x008A, AutoButtonColor = false, Size = UDim2.fromOffset(_0x0058, 0x20), Position = UDim2.new(0x1, _0x0074, 0x1, (- 0x2e))}, _0x0088)
+return _0x002A
+end
+local _0x008C = _0x0089("Simpan", 0x60, (- 0x70), _0x000D.Accent, _0x000D.Bg)
+local _0x008D = _0x0089("Batal", 0x50, (- 0xc8), _0x000D.PanelLite, _0x000D.SubText)
+local function _0x008E()
+end
+end
+function _0x005F:ResetToggles()
+for _0x004B, _0x0035 in ipairs(_0x0060) do
+end
+end
+local function _0x008F(_0x0090)
+for _0x004B, _0x0035 in ipairs(_0x0061) do
+end
+end
+function _0x005F:CreateTab(_0x004F, _0x0091)
+local _0x0092 = {}
+local _0x0093 = 0x0
+local function _0x0094()
+_0x0093 = (_0x0093 + 0x1)
+return _0x0093
+end
+local _0x0095 = _0x001F("TextButton", {Text = "", AutoButtonColor = false, BackgroundColor3 = _0x000D.PanelLite, BackgroundTransparency = 0x1, Size = UDim2.new(0x1, 0x0, 0x0, 0x22), BorderSizePixel = 0x0, LayoutOrder = ((# _0x0061) + 0x1)}, _0x0079)
+local _0x0096 = _0x0051(_0x0091, _0x0095)
+local _0x0097 = _0x001F("TextLabel", {Text = _0x004F, Font = _0x000F, TextSize = 0xd, TextColor3 = _0x000D.SubText, BackgroundTransparency = 0x1, Position = UDim2.fromOffset(0x24, 0x0), Size = UDim2.new(0x1, (- 0x24), 0x1, 0x0), TextXAlignment = Enum.TextXAlignment.Left}, _0x0095)
+local _0x0083 = _0x001F("Frame", {Size = UDim2.fromOffset(0x3, 0x10), Position = UDim2.new(0x0, 0x0, 0.5, (- 0x8)), BackgroundColor3 = _0x000D.Accent, BorderSizePixel = 0x0, Visible = false}, _0x0095)
+local _0x0098 = _0x001F("ScrollingFrame", {Size = UDim2.fromScale(0x1, 0x1), BackgroundTransparency = 0x1, BorderSizePixel = 0x0, ScrollBarThickness = 0x3, ScrollBarImageColor3 = _0x000D.Accent, CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.Y, ScrollingDirection = Enum.ScrollingDirection.Y, Visible = false}, _0x007D)
+_0x0092.Page = _0x0098
+_0x0092._setActive = function (_0x0099)
+_0x0098.Visible = _0x0099
+_0x0083.Visible = _0x0099
+if _0x0096 then
+end
+end
+if ((# _0x0061) == 0x1) then
+end
+function _0x0092:NextOrder()
+return _0x0094()
+end
+function _0x0092:CreateSection(_0x0072)
+local _0x009A = _0x001F("TextLabel", {Text = string.upper(_0x0072), Font = _0x000F, TextSize = 0xb, TextColor3 = _0x000D.Accent, BackgroundTransparency = 0x1, Size = UDim2.new(0x1, 0x0, 0x0, 0x16), TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = _0x0094()}, _0x0098)
+return _0x009A
+end
+function _0x0092:CreateLabel(_0x0072)
+local _0x009A = _0x001F("TextLabel", {Text = _0x0072, Font = _0x000E, TextSize = 0xb, TextColor3 = _0x000D.SubText, TextWrapped = true, BackgroundTransparency = 0x1, Size = UDim2.new(0x1, 0x0, 0x0, 0x1e), TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = _0x0094()}, _0x0098)
+return _0x009A
+end
+function _0x0092:CreateButton(_0x0023)
+local _0x009B, _0x009C, _0x009D
+if _0x0023.Accent then
+_0x009B, _0x009C, _0x009D = Color3.new(0x1, 0x1, 0x1), Color3.new(0.88, 0.88, 0.88), Color3.new(0.7, 0.7, 0.7)
+elseif _0x0023.Danger then
+_0x009B, _0x009C, _0x009D = _0x000D.Danger, _0x0012(_0x000D.Danger, 0.85), _0x0012(_0x000D.Danger, 0.7)
+else
+_0x009B, _0x009C, _0x009D = _0x000D.Panel, _0x000D.PanelHover, _0x000D.PanelLite
+end
+local _0x0052 = _0x001F("Frame", {Size = UDim2.new(0x1, 0x0, 0x0, 0x26), BackgroundColor3 = _0x009B, BorderSizePixel = 0x0, LayoutOrder = _0x0094()}, _0x0098)
+if _0x0023.Accent then
+elseif (not _0x0023.Danger) then
+end
+local _0x002A = _0x001F("TextButton", {Text = _0x0023.Name, Font = _0x000F, TextSize = 0xd, TextColor3 = ((_0x0023.Accent and _0x000D.Bg) or _0x000D.Text), BackgroundTransparency = 0x1, AutoButtonColor = false, Size = UDim2.fromScale(0x1, 0x1)}, _0x0052)
+return _0x002A
+end
+function _0x0092:CreateToggle(_0x0023)
+local _0x009E = false
+local _0x0014 = _0x001F("Frame", {Size = UDim2.new(0x1, 0x0, 0x0, 0x28), BackgroundColor3 = _0x000D.Panel, BorderSizePixel = 0x0, LayoutOrder = _0x0094()}, _0x0098)
+local _0x009F = _0x001F("Frame", {Size = UDim2.fromOffset(0x26, 0x14), Position = UDim2.new(0x1, (- 0x32), 0.5, (- 0xa)), BackgroundColor3 = _0x000D.Track, BorderSizePixel = 0x0}, _0x0014)
+local _0x00A0 = _0x001F("Frame", {Size = UDim2.fromOffset(0xe, 0xe), Position = UDim2.new(0x0, 0x3, 0.5, (- 0x7)), BackgroundColor3 = _0x000D.SubText, BorderSizePixel = 0x0}, _0x009F)
+local _0x00A1 = _0x001F("TextButton", {Text = "", BackgroundTransparency = 0x1, Size = UDim2.fromScale(0x1, 0x1)}, _0x0014)
+local function _0x00A2(_0x0029)
+if _0x0029 then
+else
+end
+end
+local _0x005C = {}
+function _0x005C:Get()
+return _0x009E
+end
+function _0x005C:Set(_0x0029, _0x00A3, _0x00A4)
+_0x009E = _0x0029
+if _0x00A3 then
+return
+end
+local _0x00A5, _0x00A6 = false, nil
+if _0x0023.Callback then
+local _0x0038, _0x00A7, _0x00A8 = pcall(_0x0023.Callback, _0x0029)
+if (not _0x0038) then
+_0x00A5, _0x00A6 = true, "Terjadi error (cek console)"
+elseif (_0x00A7 == false) then
+_0x00A5, _0x00A6 = true, _0x00A8
+end
+end
+if _0x00A5 then
+_0x009E = false
+if (not _0x00A4) then
+end
+elseif ((not _0x0023.Silent) and (not _0x00A4)) then
+end
+end
+if _0x0023.ResetOnRespawn then
+end
+if _0x0023.Flag then
+_0x0062[_0x0023.Flag] = {kind = "toggle", get = function ()
+return _0x009E
+end, set = function (_0x0025)
+_0x0025 = ((_0x0025 and true) or false)
+if (_0x009E ~= _0x0025) then
+end
+end}
+end
+if _0x0023.Default then
+_0x009E = true
+if _0x0023.Callback then
+end
+end
+return _0x005C
+end
+function _0x0092:CreateSlider(_0x0023)
+local _0x00A9, _0x00AA, _0x00AB = (_0x0023.Min or 0x0), (_0x0023.Max or 0x64), (_0x0023.Step or 0x1)
+local _0x00AC = math.clamp((_0x0023.Default or _0x00A9), _0x00A9, _0x00AA)
+local _0x0014 = _0x001F("Frame", {Size = UDim2.new(0x1, 0x0, 0x0, 0x36), BackgroundColor3 = _0x000D.Panel, BorderSizePixel = 0x0, LayoutOrder = _0x0094()}, _0x0098)
+local _0x00AD = _0x001F("TextLabel", {Font = _0x000F, TextSize = 0xc, TextColor3 = _0x000D.Accent, BackgroundTransparency = 0x1, Position = UDim2.new(0x1, (- 0x52), 0x0, 0x8), Size = UDim2.fromOffset(0x46, 0x12), TextXAlignment = Enum.TextXAlignment.Right}, _0x0014)
+local _0x009F = _0x001F("Frame", {Size = UDim2.new(0x1, (- 0x18), 0x0, 0x6), Position = UDim2.new(0x0, 0xc, 0x0, 0x26), BackgroundColor3 = _0x000D.Track, BorderSizePixel = 0x0}, _0x0014)
+local _0x00AE = _0x001F("Frame", {Size = UDim2.fromScale(0x0, 0x1), BackgroundColor3 = Color3.new(0x1, 0x1, 0x1), BorderSizePixel = 0x0}, _0x009F)
+local _0x00A0 = _0x001F("Frame", {Size = UDim2.fromOffset(0xe, 0xe), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0x0, 0.5), BackgroundColor3 = _0x000D.Text, BorderSizePixel = 0x0}, _0x009F)
+local _0x00AF = _0x001F("TextButton", {Text = "", BackgroundTransparency = 0x1, Position = UDim2.fromOffset(0x0, 0x1a), Size = UDim2.new(0x1, 0x0, 0x0, 0x1c)}, _0x0014)
+local function _0x00B0()
+local _0x00B1 = ((_0x00AC - _0x00A9) / (_0x00AA - _0x00A9))
+_0x00AE.Size = UDim2.fromScale(_0x00B1, 0x1)
+_0x00A0.Position = UDim2.fromScale(_0x00B1, 0.5)
+_0x00AD.Text = (tostring(_0x00AC) .. (_0x0023.Suffix or ""))
+end
+local function _0x00B2(_0x0056)
+local _0x00B1 = math.clamp(((_0x0056 - _0x009F.AbsolutePosition.X) / math.max(_0x009F.AbsoluteSize.X, 0x1)), 0x0, 0x1)
+local _0x0025 = (_0x00A9 + ((_0x00AA - _0x00A9) * _0x00B1))
+_0x0025 = ((math.floor((((_0x0025 - _0x00A9) / _0x00AB) + 0.5)) * _0x00AB) + _0x00A9)
+_0x0025 = math.clamp(_0x0025, _0x00A9, _0x00AA)
+_0x0025 = tonumber(string.format("%.3f", _0x0025))
+if (_0x0025 ~= _0x00AC) then
+_0x00AC = _0x0025
+if _0x0023.Callback then
+end
+end
+end
+local _0x0044 = false
+if _0x0023.Callback then
+end
+local _0x005C = {}
+function _0x005C:Get()
+return _0x00AC
+end
+function _0x005C:Set(_0x0025)
+_0x00AC = math.clamp((tonumber(_0x0025) or _0x00AC), _0x00A9, _0x00AA)
+if _0x0023.Callback then
+end
+end
+if _0x0023.Flag then
+_0x0062[_0x0023.Flag] = {kind = "slider", get = function ()
+return _0x00AC
+end, set = function (_0x0025)
+end}
+end
+return _0x005C
+end
+function _0x0092:CreateColorRow(_0x0023)
+local _0x00B3 = _0x0023.Default
+local _0x00B4 = _0x001F("Frame", {Size = UDim2.new(0x1, 0x0, 0x0, 0x4e), BackgroundColor3 = _0x000D.Panel, BorderSizePixel = 0x0, LayoutOrder = _0x0094()}, _0x0098)
+local _0x00B5 = _0x001F("Frame", {BackgroundTransparency = 0x1, Position = UDim2.fromOffset(0xc, 0x24), Size = UDim2.new(0x1, (- 0x18), 0x0, 0x20)}, _0x00B4)
+local _0x00B6 = {}
+local function _0x00B7()
+for _0x004F, _0x005A in pairs(_0x00B6) do
+_0x005A.Transparency = (((_0x004F == _0x00B3) and 0x0) or 0x1)
+end
+end
+local function _0x00B8(_0x004F, _0x0031)
+_0x00B3 = _0x004F
+if _0x0023.Callback then
+end
+end
+for _0x004B, _0x0013 in ipairs(_0x0023.Colors) do
+local _0x002A = _0x001F("TextButton", {Text = "", AutoButtonColor = false, BorderSizePixel = 0x0, Size = UDim2.fromOffset(0x1c, 0x1c)}, _0x00B5)
+_0x002A.BackgroundColor3 = _0x0013[0x2]
+_0x00B6[_0x0013[0x1]] = _0x001F("UIStroke", {Color = Color3.new(0x1, 0x1, 0x1), Thickness = 0x2, Transparency = 0x1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border}, _0x002A)
+end
+local _0x005C = {}
+function _0x005C:Get()
+return _0x00B3
+end
+function _0x005C:Set(_0x004F)
+for _0x004B, _0x0013 in ipairs(_0x0023.Colors) do
+if (_0x0013[0x1] == _0x004F) then
+return
+end
+end
+end
+if _0x0023.Flag then
+_0x0062[_0x0023.Flag] = {kind = "color", get = function ()
+return _0x00B3
+end, set = function (_0x0025)
+end}
+end
+return _0x005C
+end
+return _0x0092
+end
+local _0x00B9 = {active = false}
+local function _0x00BA(_0x00BB, _0x00BC)
+if _0x00B9.active then
+return
+end
+local _0x00BD = _0x00BB.UserInputType
+if ((_0x00BD ~= Enum.UserInputType.MouseButton1) and (_0x00BD ~= Enum.UserInputType.Touch)) then
+return
+end
+_0x00B9.active = true
+_0x00B9.input = _0x00BB
+_0x00B9.start = _0x00BB.Position
+_0x00B9.startPos = _0x0063.Position
+_0x00B9.scrollPage = _0x00BC
+_0x00B9.decided = (not ((_0x00BD == Enum.UserInputType.Touch) and (_0x00BC ~= nil)))
+end
+local function _0x00BE(_0x00BF)
+if (not _0x00BF.Parent) then
+return
+end
+if (not _0x00BF:IsA("GuiObject")) then
+return
+end
+if (_0x00BF:IsA("GuiButton") or _0x00BF:IsA("TextBox")) then
+return
+end
+if (_0x00BF.Name == "Shadow") then
+return
+end
+if _0x00BF:FindFirstAncestorWhichIsA("GuiButton") then
+return
+end
+local _0x00C0 = ((_0x00BF:IsA("ScrollingFrame") and _0x00BF) or _0x00BF:FindFirstAncestorWhichIsA("ScrollingFrame"))
+end
+for _0x004B, _0x00BF in ipairs(_0x0063:GetDescendants()) do
+end
+return _0x005F
+end
+local _0x00C1 = _0x001F("Frame", {Size = UDim2.fromScale(0x1, 0x1), BackgroundColor3 = _0x000D.Bg, BackgroundTransparency = 0.1, ZIndex = 0x64}, _0x0049)
+local _0x00C2 = _0x001F("Frame", {Size = UDim2.fromOffset(0x12c, 0xdc), Position = UDim2.fromScale(0.5, 0.5), AnchorPoint = Vector2.new(0.5, 0.5), BackgroundColor3 = _0x000D.Panel, BackgroundTransparency = 0.2}, _0x00C1)
+local _0x00C3 = _0x0030(_0x00C2, Color3.new(0x1, 0x1, 0x1), 1.5, 0.3)
+local _0x00C4 = _0x002B(_0x00C3, "loop", 0x0)
+local _0x00C6 = _0x0002.Heartbeat:Connect(function (_0x00C5)
+_0x00C4.Rotation = ((_0x00C4.Rotation + (_0x00C5 * 0x78)) % 0x168)
+end)
+local _0x00C7 = _0x001F("ImageLabel", {Size = UDim2.fromOffset(0x46, 0x46), Position = UDim2.fromScale(0.5, 0.25), AnchorPoint = Vector2.new(0.5, 0.5), BackgroundColor3 = _0x000D.Bg}, _0x00C2)
+local _0x00C8 = _0x0030(_0x00C7, Color3.new(0x1, 0x1, 0x1), 0x2, 0x0)
+local _0x00C9 = _0x001F("TextLabel", {Text = "Loading...", Font = _0x000E, TextSize = 0xb, TextColor3 = _0x000D.Accent, BackgroundTransparency = 0x1, Size = UDim2.new(0x1, 0x0, 0x0, 0x14), Position = UDim2.new(0x0, 0x0, 0.7, 0x0)}, _0x00C2)
+local _0x00CA = _0x001F("Frame", {Size = UDim2.new(0.8, 0x0, 0x0, 0x6), Position = UDim2.new(0.5, 0x0, 0.85, 0x0), AnchorPoint = Vector2.new(0.5, 0.5), BackgroundColor3 = _0x000D.PanelLite}, _0x00C2)
+local _0x00CB = _0x001F("Frame", {Size = UDim2.new(0x0, 0x0, 0x1, 0x0), BackgroundColor3 = Color3.new(0x1, 0x1, 0x1)}, _0x00CA)
+local _0x005F = _0x005D:CreateWindow({Title = "MEKI HUB", Badge = "V3 FREEMIUM"})
+local _0x00CC = _0x001F("Frame", {Size = UDim2.fromOffset(0x34, 0x34), Position = UDim2.new(0x0, 0x14, 0.5, (- 0x1a)), BackgroundColor3 = Color3.new(0x1, 0x1, 0x1), BorderSizePixel = 0x0, Visible = false}, _0x0049)
+local _0x00CD = _0x001F("TextButton", {Text = "", BackgroundTransparency = 0x1, Size = UDim2.fromScale(0x1, 0x1), Active = true}, _0x00CC)
+local _0x00CE = _0x0041(_0x00CC, _0x00CD)
+local _0x00CF = 0x96
+local _0x00D0 = 0x32
+local _0x00D1 = false
+local _0x00D2 = 0x10
+local _0x00D3 = false
+local _0x00D4, _0x00D5, _0x00D6
+local _0x00D7 = false
+local _0x00D8
+local _0x00D9 = false
+local _0x00DA = nil
+local _0x00DB = false
+local _0x00DC = nil
+local function _0x00DD()
+local _0x0040 = (_0x0007.Character and _0x0007.Character:FindFirstChildOfClass("Humanoid"))
+if ((not _0x0040) or (_0x0040.MoveDirection.Magnitude == 0x0)) then
+return Vector3.new(0x0, 0x0, 0x0)
+end
+local _0x00DE = workspace.CurrentCamera.CFrame:VectorToObjectSpace(_0x0040.MoveDirection)
+local _0x0025 = Vector3.new(_0x00DE.X, 0x0, _0x00DE.Z)
+return (((_0x0025.Magnitude > 0x0) and _0x0025.Unit) or _0x0025)
+end
+local function _0x00DF()
+if (not _0x00D3) then
+return
+end
+_0x00D3 = false
+if _0x00D4 then
+_0x00D4 = nil
+end
+if _0x00D5 then
+_0x00D5 = nil
+end
+if _0x00D6 then
+_0x00D6 = nil
+end
+local _0x003F = _0x0007.Character
+if _0x003F then
+local _0x0040 = _0x003F:FindFirstChildOfClass("Humanoid")
+if _0x0040 then
+_0x0040.WalkSpeed = ((_0x00D1 and _0x00D0) or _0x00D2)
+end
+local _0x00E0 = _0x003F:FindFirstChild("Animate")
+if _0x00E0 then
+_0x00E0.Disabled = false
+end
+end
+if _0x00DA then
+_0x00DA = nil
+end
+end
+local function _0x00E1(_0x009E)
+if (not _0x009E) then
+return
+end
+local _0x003F = _0x0007.Character
+local _0x00E2 = _0x003C()
+local _0x0040 = (_0x003F and _0x003F:FindFirstChildOfClass("Humanoid"))
+if ((not _0x00E2) or (not _0x0040)) then
+return false, "Karakter belum siap"
+end
+_0x00D3 = true
+if (not _0x00D1) then
+_0x00D2 = _0x0040.WalkSpeed
+end
+_0x0040.WalkSpeed = 0x0
+_0x00D4 = Instance.new("BodyVelocity")
+_0x00D4.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+_0x00D4.Velocity = Vector3.new(0x0, 0x0, 0x0)
+_0x00D4.Parent = _0x00E2
+_0x00D5 = Instance.new("BodyGyro")
+_0x00D5.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+_0x00D5.P = 0x2710
+_0x00D5.D = 0x64
+_0x00D5.Parent = _0x00E2
+local _0x00E0 = _0x003F:FindFirstChild("Animate")
+if _0x00E0 then
+_0x00E0.Disabled = true
+end
+local _0x00E3 = _0x0040:FindFirstChildOfClass("Animator")
+if _0x00E3 then
+for _0x004B, _0x0035 in ipairs(_0x00E3:GetPlayingAnimationTracks()) do
+end
+end
+if _0x00D6 then
+end
+_0x00D6 = _0x0002.RenderStepped:Connect(function ()
+if ((not _0x00D3) or (not _0x00E2.Parent)) then
+return
+end
+local _0x0068 = workspace.CurrentCamera
+local _0x00E4 = _0x00DD()
+_0x00D4.Velocity = (((_0x0068.CFrame.LookVector * (- _0x00E4.Z)) * _0x00CF) + ((_0x0068.CFrame.RightVector * _0x00E4.X) * _0x00CF))
+local _0x004B, _0x00E5, _0x004B = _0x0068.CFrame:ToEulerAnglesYXZ()
+_0x00D5.CFrame = (CFrame.new(_0x00E2.Position) * CFrame.Angles(0x0, _0x00E5, 0x0))
+end)
+end
+local function _0x00E6(_0x009E)
+_0x00D7 = _0x009E
+if _0x00D8 then
+_0x00D8 = nil
+end
+if _0x00D7 then
+_0x00D8 = _0x0002.Stepped:Connect(function ()
+if _0x0007.Character then
+for _0x004B, _0x0025 in pairs(_0x0007.Character:GetDescendants()) do
+if (_0x0025:IsA("BasePart") and _0x0025.CanCollide) then
+_0x0025.CanCollide = false
+end
+end
+end
+end)
+else
+if _0x0007.Character then
+for _0x004B, _0x0025 in pairs(_0x0007.Character:GetDescendants()) do
+if _0x0025:IsA("BasePart") then
+_0x0025.CanCollide = true
+end
+end
+end
+end
+end
+local function _0x00E7(_0x009E)
+_0x00DB = _0x009E
+if _0x00DC then
+_0x00DC = nil
+end
+if _0x00DB then
+_0x00DC = _0x0002.Stepped:Connect(function ()
+local _0x00E8 = _0x003C()
+if (not _0x00E8) then
+return
+end
+for _0x004B, _0x00E9 in pairs(_0x0000:GetPlayers()) do
+if ((_0x00E9 ~= _0x0007) and _0x00E9.Character) then
+local _0x00EA = _0x00E9.Character:FindFirstChild("HumanoidRootPart")
+if (_0x00EA and ((_0x00E8.Position - _0x00EA.Position).Magnitude < 0x4)) then
+local _0x00EB = Instance.new("BodyVelocity")
+_0x00EB.Velocity = Vector3.new(math.random((- 0x1f4), 0x1f4), math.random(0x1f4, 0x3e8), math.random((- 0x1f4), 0x1f4))
+_0x00EB.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+_0x00EB.Parent = _0x00EA
+end
+end
+end
+end)
+end
+end
+local _0x00EC = _0x005F:CreateTab("Home", "home")
+local _0x00B4 = _0x001F("Frame", {Size = UDim2.new(0x1, 0x0, 0x0, 0x58), BackgroundColor3 = Color3.new(0x1, 0x1, 0x1), BorderSizePixel = 0x0, LayoutOrder = _0x00EC:NextOrder()}, _0x00EC.Page)
+local _0x00ED = _0x001F("ImageLabel", {Size = UDim2.fromOffset(0x3c, 0x3c), Position = UDim2.fromOffset(0xe, 0xe), BackgroundColor3 = _0x000D.PanelLite, BorderSizePixel = 0x0}, _0x00B4)
+local _0x00EE = _0x0030(_0x00ED, Color3.new(0x1, 0x1, 0x1), 0x2, 0x0)
+local function _0x00EF(_0x00F0)
+local _0x0014 = _0x001F("Frame", {Size = UDim2.new(0x1, 0x0, 0x0, 0x20), BackgroundColor3 = _0x000D.Panel, BorderSizePixel = 0x0, LayoutOrder = _0x00EC:NextOrder()}, _0x00EC.Page)
+return _0x001F("TextLabel", {Text = "-", Font = _0x000F, TextSize = 0xc, TextColor3 = _0x000D.Text, BackgroundTransparency = 0x1, Position = UDim2.new(0.4, 0x0, 0x0, 0x0), Size = UDim2.new(0.6, (- 0xc), 0x1, 0x0), TextXAlignment = Enum.TextXAlignment.Right, TextTruncate = Enum.TextTruncate.AtEnd}, _0x0014)
+end
+local _0x00F1 = _0x00EF("Map")
+local _0x00F2 = _0x00EF("Place ID")
+local _0x00F3 = _0x00EF("Pemain")
+local _0x00F4 = _0x00EF("FPS")
+local _0x00F5 = _0x00EF("Ping")
+local _0x00F6 = _0x00EF("Durasi Sesi")
+_0x00F2.Text = tostring(game.PlaceId)
+_0x00F1.Text = game.Name
+local _0x00F7, _0x00F8 = 0x0, 0x0
+local function _0x00F9()
+local _0x0038, _0x0025 = pcall(function ()
+return game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue()
+end)
+return ((_0x0038 and math.floor(_0x0025)) or 0x0)
+end
+local _0x00FA = os.clock()
+local _0x00FB = {}
+local _0x00FC, _0x00FD, _0x00FE = 0x1, 0x0, false
+local _0x00FF = ("meki_hub_" .. (tostring(game.PlaceId) .. ".json"))
+local function _0x0100()
+if (not _0x0015()) then
+return
+end
+local _0x0101 = {}
+for _0x0102, _0x0103 in ipairs(_0x00FB) do
+_0x0101[_0x0102] = {name = _0x0103.name, cf = {_0x0103.cframe:GetComponents()}}
+end
+end
+local function _0x0104()
+if ((not _0x0015()) or (not isfile(_0x00FF))) then
+return
+end
+local _0x0038, _0x0105 = pcall(readfile, _0x00FF)
+if ((not _0x0038) or (not _0x0105)) then
+return
+end
+local _0x0106, _0x0107 = pcall(_0x0004.JSONDecode, _0x0004, _0x0105)
+if ((not _0x0106) or (type(_0x0107) ~= "table")) then
+return
+end
+for _0x004B, _0x0103 in ipairs(_0x0107) do
+if (((type(_0x0103.name) == "string") and (type(_0x0103.cf) == "table")) and ((# _0x0103.cf) == 0xc)) then
+end
+end
+end
+local _0x0108 = _0x005F:CreateTab("Waypoints", "pin")
+local _0x0109
+local _0x010A
+local function _0x010B()
+local _0x003F = _0x0007.Character
+if (not _0x003F) then
+return
+end
+end
+_0x010A = _0x0108:CreateToggle({Name = "Auto TP", Flag = "autoTP", Callback = function (_0x0029)
+if (not _0x0029) then
+_0x00FE = false
+return
+end
+if ((# _0x00FB) == 0x0) then
+return false, "Belum ada waypoint tersimpan"
+end
+_0x00FE = true
+_0x00FC = 0x1
+_0x00FD = (_0x00FD + 0x1)
+local _0x010C = _0x00FD
+end})
+local function _0x010D(_0x0098, _0x0102, _0x0103)
+local _0x00B5 = _0x001F("Frame", {Name = "WPRow", Size = UDim2.new(0x1, 0x0, 0x0, 0x28), BackgroundColor3 = _0x000D.Panel, BorderSizePixel = 0x0, LayoutOrder = (0x3e8 + _0x0102)}, _0x0098)
+local _0x010E = _0x001F("TextButton", {Text = "TP", Font = _0x000F, TextSize = 0xb, TextColor3 = _0x000D.Bg, BackgroundColor3 = _0x000D.Accent, AutoButtonColor = false, Size = UDim2.fromOffset(0x22, 0x1a), Position = UDim2.new(0x1, (- (0x22 + 0x8a)), 0.5, (- 0xd))}, _0x00B5)
+local _0x010F = _0x001F("TextButton", {Text = "", BackgroundColor3 = _0x000D.PanelLite, AutoButtonColor = false, Size = UDim2.fromOffset(0x18, 0x1a), Position = UDim2.new(0x1, (- 0x70), 0.5, (- 0xd))}, _0x00B5)
+local _0x0110 = _0x001F("TextLabel", {Text = ">", Font = _0x000F, TextSize = 0xe, TextColor3 = _0x000D.SubText, BackgroundTransparency = 0x1, Size = UDim2.fromScale(0x1, 0x1), Rotation = (- 0x5a)}, _0x010F)
+if (_0x0102 > 0x1) then
+else
+_0x0110.TextColor3 = _0x000D.Track
+end
+local _0x0111 = _0x001F("TextButton", {Text = "", BackgroundColor3 = _0x000D.PanelLite, AutoButtonColor = false, Size = UDim2.fromOffset(0x18, 0x1a), Position = UDim2.new(0x1, (- 0x56), 0.5, (- 0xd))}, _0x00B5)
+local _0x0112 = _0x001F("TextLabel", {Text = ">", Font = _0x000F, TextSize = 0xe, TextColor3 = _0x000D.SubText, BackgroundTransparency = 0x1, Size = UDim2.fromScale(0x1, 0x1), Rotation = 0x5a}, _0x0111)
+if (_0x0102 < (# _0x00FB)) then
+else
+_0x0112.TextColor3 = _0x000D.Track
+end
+local _0x0113 = _0x001F("TextButton", {Text = "", BackgroundColor3 = _0x000D.PanelLite, AutoButtonColor = false, Size = UDim2.fromOffset(0x1a, 0x1a), Position = UDim2.new(0x1, (- 0x3c), 0.5, (- 0xd))}, _0x00B5)
+local _0x0114 = _0x001F("TextButton", {Text = "X", Font = _0x000F, TextSize = 0xb, TextColor3 = _0x000D.Text, BackgroundColor3 = _0x000D.Danger, AutoButtonColor = false, Size = UDim2.fromOffset(0x1a, 0x1a), Position = UDim2.new(0x1, (- 0x22), 0.5, (- 0xd))}, _0x00B5)
+end
+_0x0109 = function ()
+for _0x004B, _0x0013 in ipairs(_0x0108.Page:GetChildren()) do
+if (_0x0013.Name == "WPRow") then
+end
+end
+if ((# _0x00FB) == 0x0) then
+else
+for _0x0102, _0x0103 in ipairs(_0x00FB) do
+end
+end
+end
+local _0x0115 = {enabled = false, box = true, name = true, dist = true, health = true, tracer = false, teamCheck = false, maxDist = 0x3e8, color = Color3.fromRGB(0xff, 0x46, 0x5a)}
+local _0x0116 = Instance.new("Folder")
+_0x0116.Name = "MekiESP"
+_0x0116.Parent = _0x003A()
+local _0x0117 = _0x001F("Frame", {Name = "Tracers", Size = UDim2.fromScale(0x1, 0x1), BackgroundTransparency = 0x1, BorderSizePixel = 0x0, ZIndex = 0x0}, _0x0049)
+local _0x0118 = {}
+local _0x0119
+local function _0x011A(_0x011B)
+local _0x0023 = _0x0118[_0x011B]
+if (not _0x0023) then
+return
+end
+_0x0118[_0x011B] = nil
+end
+local function _0x011C(_0x011B)
+local _0x011D = Instance.new("Highlight")
+_0x011D.FillTransparency = 0.75
+_0x011D.OutlineTransparency = 0x0
+_0x011D.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+_0x011D.Enabled = false
+_0x011D.Parent = _0x0116
+local _0x011E = Instance.new("BillboardGui")
+_0x011E.Size = UDim2.fromOffset(0xb4, 0x2e)
+_0x011E.StudsOffset = Vector3.new(0x0, 3.4, 0x0)
+_0x011E.AlwaysOnTop = true
+_0x011E.Enabled = false
+_0x011E.Parent = _0x0116
+local _0x0097 = _0x001F("TextLabel", {BackgroundTransparency = 0x1, Size = UDim2.new(0x1, 0x0, 0x0, 0x20), Font = _0x000F, TextSize = 0xd, TextColor3 = _0x0115.color, TextStrokeTransparency = 0.3, Text = "", TextYAlignment = Enum.TextYAlignment.Bottom}, _0x011E)
+local _0x011F = _0x001F("Frame", {AnchorPoint = Vector2.new(0.5, 0x0), Position = UDim2.new(0.5, 0x0, 0x0, 0x24), Size = UDim2.fromOffset(0x50, 0x5), BackgroundColor3 = Color3.fromRGB(0x14, 0x14, 0x14), BorderSizePixel = 0x0}, _0x011E)
+local _0x00CB = _0x001F("Frame", {Size = UDim2.fromScale(0x1, 0x1), BackgroundColor3 = Color3.fromRGB(0x46, 0xdc, 0x8c), BorderSizePixel = 0x0}, _0x011F)
+local _0x0120 = _0x001F("Frame", {AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(0x0, 0x2), BackgroundColor3 = _0x0115.color, BorderSizePixel = 0x0, Visible = false}, _0x0117)
+local _0x0023 = {hl = _0x011D, bb = _0x011E, lbl = _0x0097, barBack = _0x011F, barFill = _0x00CB, line = _0x0120}
+_0x0118[_0x011B] = _0x0023
+return _0x0023
+end
+local function _0x0121(_0x0023)
+_0x0023.hl.Enabled = false
+_0x0023.bb.Enabled = false
+_0x0023.line.Visible = false
+end
+local function _0x0122()
+local _0x0068 = workspace.CurrentCamera
+if (not _0x0068) then
+return
+end
+local _0x0069 = _0x0068.ViewportSize
+local _0x00E8 = _0x003C()
+for _0x004B, _0x011B in ipairs(_0x0000:GetPlayers()) do
+if (_0x011B ~= _0x0007) then
+local _0x003F = _0x011B.Character
+local _0x00E2 = (_0x003F and _0x003F:FindFirstChild("HumanoidRootPart"))
+local _0x0040 = (_0x003F and _0x003F:FindFirstChildOfClass("Humanoid"))
+local _0x0123 = (((_0x00E2 ~= nil) and (_0x0040 ~= nil)) and (_0x0040.Health > 0x0))
+if (((_0x0123 and _0x0115.teamCheck) and (_0x011B.Team ~= nil)) and (_0x011B.Team == _0x0007.Team)) then
+_0x0123 = false
+end
+local _0x0124 = 0x0
+if (_0x0123 and _0x00E8) then
+_0x0124 = (_0x00E8.Position - _0x00E2.Position).Magnitude
+if (_0x0124 > _0x0115.maxDist) then
+_0x0123 = false
+end
+end
+local _0x0023 = _0x0118[_0x011B]
+if (not _0x0123) then
+if _0x0023 then
+end
+else
+if (not _0x0023) then
+_0x0023 = _0x011C(_0x011B)
+end
+_0x0023.hl.Adornee = _0x003F
+_0x0023.hl.FillColor = _0x0115.color
+_0x0023.hl.OutlineColor = _0x0115.color
+_0x0023.hl.Enabled = _0x0115.box
+local _0x0125 = (_0x0115.name or _0x0115.dist)
+local _0x0126 = ""
+if _0x0115.name then
+_0x0126 = _0x011B.DisplayName
+end
+if _0x0115.dist then
+_0x0126 = (_0x0126 .. ((((_0x0126 ~= "") and "\n") or "") .. (math.floor(_0x0124) .. " m")))
+end
+_0x0023.bb.Adornee = _0x00E2
+_0x0023.bb.Enabled = (_0x0125 or _0x0115.health)
+_0x0023.lbl.Visible = _0x0125
+_0x0023.lbl.Text = _0x0126
+_0x0023.lbl.TextColor3 = _0x0115.color
+_0x0023.barBack.Visible = _0x0115.health
+if _0x0115.health then
+local _0x0127 = math.clamp((_0x0040.Health / math.max(_0x0040.MaxHealth, 0x1)), 0x0, 0x1)
+_0x0023.barFill.Size = UDim2.fromScale(_0x0127, 0x1)
+_0x0023.barFill.BackgroundColor3 = Color3.fromRGB(0xff, 0x46, 0x46):Lerp(Color3.fromRGB(0x46, 0xdc, 0x8c), _0x0127)
+end
+if _0x0115.tracer then
+local _0x0025, _0x0128 = _0x0068:WorldToViewportPoint(_0x00E2.Position)
+if _0x0128 then
+local _0x0039 = Vector2.new((_0x0069.X / 0x2), _0x0069.Y)
+local _0x002A = Vector2.new(_0x0025.X, _0x0025.Y)
+local _0x00BF = (_0x002A - _0x0039)
+local _0x0129 = (_0x0039 + (_0x00BF / 0x2))
+_0x0023.line.Size = UDim2.fromOffset(_0x00BF.Magnitude, 0x2)
+_0x0023.line.Position = UDim2.fromOffset(_0x0129.X, _0x0129.Y)
+_0x0023.line.Rotation = math.deg(math.atan2(_0x00BF.Y, _0x00BF.X))
+_0x0023.line.BackgroundColor3 = _0x0115.color
+_0x0023.line.Visible = true
+else
+_0x0023.line.Visible = false
+end
+else
+_0x0023.line.Visible = false
+end
+end
+end
+end
+end
+local function _0x012A()
+if _0x0119 then
+_0x0119 = nil
+end
+for _0x011B in pairs(_0x0118) do
+end
+end
+local function _0x012B()
+if _0x0119 then
+return
+end
+_0x0119 = _0x0002.RenderStepped:Connect(function ()
+end)
+end
+local _0x012C = game:GetService("Lighting")
+local _0x012D
+local function _0x012E(_0x0099)
+if _0x0099 then
+if (not _0x012D) then
+_0x012D = {Brightness = _0x012C.Brightness, ClockTime = _0x012C.ClockTime, FogEnd = _0x012C.FogEnd, GlobalShadows = _0x012C.GlobalShadows, Ambient = _0x012C.Ambient, OutdoorAmbient = _0x012C.OutdoorAmbient}
+end
+_0x012C.Brightness = 0x2
+_0x012C.ClockTime = 0xe
+_0x012C.FogEnd = 0xf4240
+_0x012C.GlobalShadows = false
+_0x012C.Ambient = Color3.fromRGB(0xb2, 0xb2, 0xb2)
+_0x012C.OutdoorAmbient = Color3.fromRGB(0xb2, 0xb2, 0xb2)
+elseif _0x012D then
+for _0x0024, _0x0025 in pairs(_0x012D) do
+_0x012C[_0x0024] = _0x0025
+end
+_0x012D = nil
+end
+end
+local _0x012F = _0x005F:CreateTab("Movement", "user")
+local _0x0130 = _0x005F:CreateTab("ESP", "eye")
+local _0x0131 = _0x005F:CreateTab("Misc", "misc")
+local _0x0132 = game:GetService("TeleportService")
+local _0x0133 = "meki_hub_configs.json"
+local _0x0134 = {configs = {}, last = nil, autoload = false}
+local function _0x0135()
+if ((not _0x0015()) or (not isfile(_0x0133))) then
+return
+end
+local _0x0038, _0x0105 = pcall(readfile, _0x0133)
+if ((not _0x0038) or (not _0x0105)) then
+return
+end
+local _0x0106, _0x0136 = pcall(_0x0004.JSONDecode, _0x0004, _0x0105)
+if (_0x0106 and (type(_0x0136) == "table")) then
+_0x0134.configs = (((type(_0x0136.configs) == "table") and _0x0136.configs) or {})
+_0x0134.last = (((type(_0x0136.last) == "string") and _0x0136.last) or nil)
+_0x0134.autoload = (_0x0136.autoload == true)
+end
+end
+local function _0x0137()
+if (not _0x0015()) then
+return false
+end
+return pcall(function ()
+end)
+end
+local function _0x0138()
+local _0x0139 = {}
+for _0x013A, _0x0014 in pairs(_0x005F.Flags) do
+local _0x0038, _0x0025 = pcall(_0x0014.get)
+if _0x0038 then
+_0x0139[_0x013A] = _0x0025
+end
+end
+return _0x0139
+end
+local function _0x013B(_0x013C)
+for _0x013A, _0x0014 in pairs(_0x005F.Flags) do
+if ((_0x013C[_0x013A] ~= nil) and (_0x0014.kind ~= "toggle")) then
+end
+end
+for _0x013A, _0x0014 in pairs(_0x005F.Flags) do
+if ((_0x013C[_0x013A] ~= nil) and (_0x0014.kind == "toggle")) then
+end
+end
+end
+local _0x013D
+local function _0x013E(_0x004F)
+local _0x013C = _0x0134.configs[_0x004F]
+if (type(_0x013C) ~= "table") then
+return
+end
+_0x0134.last = _0x004F
+end
+local function _0x013F(_0x004F)
+_0x004F = tostring(_0x004F):match("^%s*(.-)%s*$")
+if ((# _0x004F) == 0x0) then
+return
+end
+if ((# _0x004F) > 0x18) then
+_0x004F = _0x004F:sub(0x1, 0x18)
+end
+local _0x0140 = (_0x0134.configs[_0x004F] ~= nil)
+_0x0134.configs[_0x004F] = _0x0138()
+_0x0134.last = _0x004F
+if _0x0137() then
+else
+end
+end
+local function _0x0141(_0x004F)
+_0x0134.configs[_0x004F] = nil
+if (_0x0134.last == _0x004F) then
+_0x0134.last = nil
+end
+end
+local function _0x0142()
+end
+local _0x0143 = false
+local function _0x0144()
+if _0x0143 then
+return
+end
+_0x0143 = true
+end
+local _0x0145 = _0x005F:CreateTab("Config", "gear")
+local _0x0146 = _0x001F("Frame", {Size = UDim2.new(0x1, 0x0, 0x0, 0x0), AutomaticSize = Enum.AutomaticSize.Y, BackgroundTransparency = 0x1, LayoutOrder = _0x0145:NextOrder()}, _0x0145.Page)
+_0x013D = function ()
+for _0x004B, _0x0013 in ipairs(_0x0146:GetChildren()) do
+if _0x0013:IsA("GuiObject") then
+end
+end
+local _0x0147 = {}
+for _0x0148 in pairs(_0x0134.configs) do
+end
+if ((# _0x0147) == 0x0) then
+return
+end
+for _0x0102, _0x0148 in ipairs(_0x0147) do
+local _0x00B5 = _0x001F("Frame", {Size = UDim2.new(0x1, 0x0, 0x0, 0x28), BackgroundColor3 = _0x000D.Panel, BorderSizePixel = 0x0, LayoutOrder = _0x0102}, _0x0146)
+local _0x0149 = _0x001F("TextButton", {Text = "Load", Font = _0x000F, TextSize = 0xb, TextColor3 = _0x000D.Bg, BackgroundColor3 = _0x000D.Accent, AutoButtonColor = false, Size = UDim2.fromOffset(0x32, 0x1a), Position = UDim2.new(0x1, (- 0x5a), 0.5, (- 0xd))}, _0x00B5)
+local _0x0114 = _0x001F("TextButton", {Text = "X", Font = _0x000F, TextSize = 0xb, TextColor3 = _0x000D.Text, BackgroundColor3 = _0x000D.Danger, AutoButtonColor = false, Size = UDim2.fromOffset(0x1a, 0x1a), Position = UDim2.new(0x1, (- 0x22), 0.5, (- 0xd))}, _0x00B5)
+end
+end
+if ((_0x0134.autoload and _0x0134.last) and _0x0134.configs[_0x0134.last]) then
+end
+_0x0008.MekiHub_Cleanup = function ()
+_0x0009 = true
+_0x00FE = false
+_0x00D9 = false
+for _0x004B, _0x0013 in ipairs(_0x000A) do
+end
+end
