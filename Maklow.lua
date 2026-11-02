@@ -1,7 +1,7 @@
---[[ Obfuscate By mekinjir ]]--
-local function _0xJUNK0() local a=0 for i=1,105 do a=a+i end return a end
-local function _0xJUNK1() local a=0 for i=1,108 do a=a+i end return a end
-local function _0xJUNK2() local a=0 for i=1,182 do a=a+i end return a end
+--[[ Obfuscate By mekinjir (Safe Mode) ]]--
+local function _0xJUNK0() local a=0 for i=1,179 do a=a+i end return a end
+local function _0xJUNK1() local a=0 for i=1,234 do a=a+i end return a end
+local function _0xJUNK2() local a=0 for i=1,159 do a=a+i end return a end
 local _0x0000 = game:GetService("Players")
 local _0x0001 = game:GetService("UserInputService")
 local _0x0002 = game:GetService("RunService")
