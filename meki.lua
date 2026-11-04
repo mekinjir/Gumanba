@@ -1340,7 +1340,7 @@ local toggleCircle = new("Frame", {
 round(toggleCircle, 14)
 outline(toggleCircle, Color3.new(1, 1, 1), 1.5, 0.35)
 
-local TOGGLE_IMAGE_ID = "ISI_ID_GAMBAR_DI_SINI"
+local TOGGLE_IMAGE_ID = "99762767463256"
 local togglePhoto = new("ImageLabel", {
 	Name = "TogglePhoto", Size = UDim2.fromScale(1, 1),
 	BackgroundTransparency = 1, BorderSizePixel = 0,
@@ -1399,7 +1399,8 @@ task.spawn(function()
         round(side,15)
         local sideCover = new("Frame", {Size=UDim2.new(0,18,1,0), Position=UDim2.new(1,-18,0,0), BackgroundColor3=T.Bg, BorderSizePixel=0, ZIndex=302}, side)
         gradient(side,"seq",45)
-        new("TextLabel", {Text="M", Font=FONTB, TextSize=38, TextColor3=T.Bg, BackgroundColor3=T.Accent, Position=UDim2.fromOffset(21,35), Size=UDim2.fromOffset(54,54), ZIndex=303}, side)
+        local keyLogo = new("ImageLabel", {Name="KeyScreenLogo", Image="rbxassetid://99762767463256", ScaleType=Enum.ScaleType.Crop, BackgroundColor3=T.Accent, BorderSizePixel=0, Position=UDim2.fromOffset(21,35), Size=UDim2.fromOffset(54,54), ZIndex=303}, side)
+        round(keyLogo, 0)
         new("TextLabel", {Text="MEKI", Font=FONTB, TextSize=15, TextColor3=T.Text, BackgroundTransparency=1, Position=UDim2.fromOffset(8,103), Size=UDim2.new(1,-16,0,22), TextXAlignment=Enum.TextXAlignment.Center, ZIndex=303}, side)
         new("TextLabel", {Text="HUB V3", Font=FONT, TextSize=10, TextColor3=T.SubText, BackgroundTransparency=1, Position=UDim2.fromOffset(8,125), Size=UDim2.new(1,-16,0,18), TextXAlignment=Enum.TextXAlignment.Center, ZIndex=303}, side)
         local sideLine = new("Frame", {Size=UDim2.fromOffset(38,2), Position=UDim2.new(0.5,-19,0,157), BackgroundColor3=T.Accent, BorderSizePixel=0, ZIndex=303}, side)
@@ -2639,24 +2640,49 @@ sendWebhook = function(title, description, color)
     local quoteBlock = quoteText ~= "" and ("> " .. quoteText .. "\n\n") or ""
     local totalLine = "\n\n**Total Execute:** `" .. tostring(totalExecCount) .. "`"
 
-    local avatarUrl = "https://www.roblox.com/headshot-thumbnail/image?userId="
+    local function resolveThumbnail(apiUrl, fallbackUrl)
+        local okThumb, thumbResponse = pcall(function()
+            return requestFn({
+                Url = apiUrl,
+                Method = "GET",
+                Headers = { ["Accept"] = "application/json" },
+            })
+        end)
+        if okThumb and thumbResponse and thumbResponse.Body then
+            local decodedOk, decoded = pcall(function()
+                return HttpService:JSONDecode(thumbResponse.Body)
+            end)
+            if decodedOk and decoded and decoded.data and decoded.data[1]
+                and type(decoded.data[1].imageUrl) == "string" then
+                return decoded.data[1].imageUrl
+            end
+        end
+        return fallbackUrl
+    end
+
+    local avatarFallback = "https://www.roblox.com/headshot-thumbnail/image?userId="
         .. tostring(player.UserId) .. "&width=420&height=420&format=png"
+    local avatarUrl = resolveThumbnail(
+        "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds="
+            .. tostring(player.UserId) .. "&size=420x420&format=Png&isCircular=false",
+        avatarFallback
+    )
+
+    local embed = {
+        author = {
+            name = tostring(player.Name) .. " • MEKI HUB",
+            icon_url = avatarUrl,
+        },
+        title = tostring(title or "MEKI HUB"),
+        description = quoteBlock .. bodyText .. totalLine,
+        color = color or 3447003,
+        footer = { text = "MEKI HUB V3 • EXECUTION LOGGER" },
+        timestamp = DateTime.now():ToIsoDate(),
+    }
     local payload = {
         username = "MEKI HUB LOGGER",
         avatar_url = avatarUrl,
-        embeds = {{
-            author = {
-                name = tostring(player.Name) .. " • MEKI HUB",
-                icon_url = avatarUrl,
-            },
-            title = tostring(title or "MEKI HUB"),
-            description = quoteBlock .. bodyText .. totalLine,
-            color = color or 3447003,
-
-            thumbnail = { url = "https://www.roblox.com/asset-thumbnail/image?assetId=99762767463256&width=420&height=420&format=png" },
-            footer = { text = "MEKI HUB V3 • EXECUTION LOGGER" },
-            timestamp = DateTime.now():ToIsoDate(),
-        }}
+        embeds = { embed },
     }
     local ok, response = pcall(function()
         return requestFn({
@@ -2815,7 +2841,6 @@ CF:CreateToggle({
 	end,
 })
 
-CF:CreateSection("Discord Webhook")
 
 CF:CreateSection("Auto Execute / Rejoin")
 CF:CreateToggle({
