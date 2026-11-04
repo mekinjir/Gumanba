@@ -2098,45 +2098,10 @@ local function getSummitCheckpointWait()
 end
 
 local function reachSummitPoint(point)
-    local attempt = 0
-    while summitState and not isCleaningUp do
-        attempt += 1
-        tpTo(point)
-
-        local waitFor = getSummitCheckpointWait()
-        local started = os.clock()
-        local stableSince = nil
-        local confirmed = false
-
-        while os.clock() - started < waitFor do
-            if not summitState or isCleaningUp then return false end
-            local char = player.Character
-            local root = char and char:FindFirstChild("HumanoidRootPart")
-            local nearPoint = root and (root.Position - point.cframe.Position).Magnitude <= 30
-
-            if nearPoint then
-                stableSince = stableSince or os.clock()
-                if os.clock() - stableSince >= 0.35 then
-                    confirmed = true
-                end
-            else
-                stableSince = nil
-                confirmed = false
-            end
-            task.wait(0.1)
-        end
-
-        local char = player.Character
-        local root = char and char:FindFirstChild("HumanoidRootPart")
-        if confirmed and root and (root.Position - point.cframe.Position).Magnitude <= 30 then
-            return true
-        end
-
-        -- Retry terus tanpa batas selama Auto Summit masih aktif.
-        -- Jeda bertambah sedikit agar ping/server lag punya waktu pulih.
-        task.wait(math.min(0.5 + (attempt * 0.25), 3))
-    end
-    return false
+    if not summitState or isCleaningUp then return false end
+    tpTo(point)
+    task.wait(0.8)
+    return summitState and not isCleaningUp
 end
 
 local function fireFinishRemote(map)
@@ -2168,7 +2133,7 @@ TPT:CreateDropdown({
 })
 
 TPT:CreateSection("Auto Summit")
-TPT:CreateLabel("Auto detect & recovery checkpoint aktif")
+TPT:CreateLabel("NOTE : JIKA CP KE SKIP MATI IN AUTO SUMMIT TERUS NYALAIN ULANG")
 summitToggle = TPT:CreateToggle({
 	Name = "Auto Summit", Flag = "autoSummit",
 	Callback = function(s)
@@ -2201,11 +2166,7 @@ summitToggle = TPT:CreateToggle({
                     startSummitAnim()
                 end
                 local checkpointReached = reachSummitPoint(map.points[idx])
-                if not checkpointReached then
-                    Window:Notify("Auto Summit", "Checkpoint belum terjangkau, mencoba ulang...", 1.5)
-                    task.wait(0.5)
-                    continue
-                end
+                if not checkpointReached then break end
 
 				if idx == #map.points then
 					if map.finishRemote then
