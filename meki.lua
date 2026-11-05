@@ -1089,6 +1089,7 @@ function Lib:CreateWindow(cfg)
 			end
 
 			for i, name in ipairs(o.Options) do
+				local locked = o.DisabledOptions and o.DisabledOptions[name] == true
 				local btn = new("TextButton", {
 					Text = "", AutoButtonColor = false, BorderSizePixel = 0,
 					BackgroundColor3 = T.Panel,
@@ -1097,17 +1098,24 @@ function Lib:CreateWindow(cfg)
 				round(btn, 6)
 				local dot = new("Frame", {
 					Size = UDim2.fromOffset(10, 10), Position = UDim2.new(0, 10, 0.5, -5),
-					BackgroundColor3 = T.Track, BorderSizePixel = 0,
+					BackgroundColor3 = locked and T.Stroke or T.Track, BorderSizePixel = 0,
 				}, btn)
 				round(dot, 5)
 				local lbl = new("TextLabel", {
-					Text = name, Font = FONTB, TextSize = 13, TextColor3 = T.SubText,
+					Text = (locked and "🔒 " or "") .. name, Font = FONTB, TextSize = 13,
+					TextColor3 = locked and T.SubText or T.Text,
 					BackgroundTransparency = 1,
 					Position = UDim2.fromOffset(30, 0), Size = UDim2.new(1, -36, 1, 0),
 					TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd,
 				}, btn)
 				items[name] = { btn = btn, dot = dot, lbl = lbl }
-				btn.MouseButton1Click:Connect(function() choose(name) end)
+				btn.MouseButton1Click:Connect(function()
+					if locked then
+						if Window and Window.Notify then Window:Notify("Auto Summit", "🔒 Map ini terkunci — bukan map yang sedang dimainkan", 2, "error") end
+						return
+					end
+					choose(name)
+				end)
 			end
 			refresh()
 
@@ -1698,16 +1706,16 @@ new("TextLabel", {
     TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd,
 }, profileCard)
 new("TextLabel", {
-    Text = "@" .. player.Name, Font = FONT, TextSize = 11, TextColor3 = T.SubText,
+    Text = "@" .. player.Name, Font = FONT, TextSize = 10, TextColor3 = T.SubText,
     BackgroundTransparency = 1,
-    Position = UDim2.fromOffset(88, 47), Size = UDim2.new(0.48, -88, 0, 18),
-    TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd,
+    Position = UDim2.fromOffset(88, 47), Size = UDim2.fromOffset(158, 18),
+    TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.None,
 }, profileCard)
 new("TextLabel", {
-    Text = "ID: " .. tostring(player.UserId), Font = FONTB, TextSize = 11, TextColor3 = T.Accent,
+    Text = "ID: " .. tostring(player.UserId), Font = FONTB, TextSize = 10, TextColor3 = T.Accent,
     BackgroundTransparency = 1,
-    Position = UDim2.new(0.52, 0, 0, 47), Size = UDim2.new(0.48, -14, 0, 18),
-    TextXAlignment = Enum.TextXAlignment.Right, TextTruncate = Enum.TextTruncate.AtEnd,
+    Position = UDim2.fromOffset(254, 47), Size = UDim2.new(1, -266, 0, 18),
+    TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.None,
 }, profileCard)
 
 HM:CreateSection("INFORMASI MAP & SERVER")
@@ -1805,7 +1813,7 @@ MAIN:CreateButton({ Name = "Teleport ke Lokasi", Accent = true, Callback = funct
     end
 end })
 
-MAIN:CreateSection("Meow Fishing")
+MAIN:CreateSection("MEKI HUB FISHING")
 local FishingConfig = { Running = false, Power = 100, BiteTimeout = 30, CollectInterval = 2, TapMaxDuration = 15 }
 local FishingStatus = { phase = "idle", message = "Idle" }
 local fishingBusy, fishingSince, lastCollect, tappingRod, miniStartTime = false, 0, 0, nil, 0
@@ -1915,7 +1923,6 @@ local function fishingDoCast()
     if not FishingConfig.Running or isCleaningUp then fishingBusy = false return end
     FishingStatus.phase, FishingStatus.message = "casting", "Reeling out..."
     fishingFireCast("release")
-    task.wait(0.1)
     fishingSince = os.clock()
     FishingStatus.phase, FishingStatus.message = "waiting", "Nunggu ikan narik..."
     fishingBusy = false
@@ -1928,8 +1935,7 @@ task.spawn(function()
     if handler then local ok, result = pcall(require, handler); if ok then FishingMiniGameHandler = result end end
 end)
 task.spawn(function()
-    -- Tap diberi jeda pendek agar input tidak menumpuk dalam frame yang sama
-    -- (beberapa minigame mengabaikan tap yang datang serentak).
+    -- Tap berjalan secepat satu frame; tanpa jeda tetap 0.04 detik.
     while not isCleaningUp do
         if FishingConfig.Running and tappingRod then
             local status = fishingStatus(tappingRod)
@@ -1938,16 +1944,16 @@ task.spawn(function()
                 tappingRod = nil
             else
                 fishingTap()
-                task.wait(0.04) -- sekitar 25 tap/detik; lebih responsif dan berjarak konsisten
+                task.wait() -- tap setiap frame agar responsif tanpa jeda buatan
             end
         else
-            task.wait(0.03)
+            task.wait()
         end
     end
 end)
 task.spawn(function()
     while not isCleaningUp do
-        task.wait(0.1)
+        task.wait() -- polling setiap frame; recast segera setelah status ikan selesai
         if not FishingConfig.Running then
             FishingStatus.phase, FishingStatus.message = "idle", "Idle"
             tappingRod = nil
@@ -2000,7 +2006,6 @@ fishingToggle = MAIN:CreateToggle({ Name = "Auto Fishing", Flag = "autoFishing",
     FishingConfig.Running = enabled
     if not enabled then fishingFireCast("cancel"); fishingSince = 0; fishingBusy = false; tappingRod = nil end
 end })
-MAIN:CreateLabel("Auto cast, auto tap minigame, auto collect, dan recast otomatis.")
 end -- tutup blok fitur Main/Fishing
 
 local frames, acc = 0, 0
@@ -2248,6 +2253,12 @@ end
 
 local stopSummitAnim -- [fix] forward declare, dipakai MekiHub_Cleanup
 do -- [fix] blok teleport/summit (kurangi local di level atas)
+-- Auto Summit map validation uses Roblox PlaceId (game.PlaceId), not UniverseId.
+-- Supported PlaceIds supplied by the user:
+-- Mount Soreya  : 118517641508250
+-- Mount Funkot  : 78842106567506
+-- Mount Senoria : 134551551665645
+-- Mount Sorry   : 139142243919159
 local TELEPORT_MAPS = {
 	{
 		name = "MOUNT FUNKOT",
@@ -2438,35 +2449,44 @@ local function fireFinishRemote(map)
 	end
 end
 
-TPT:CreateSection("Pilih Map")
-local mapNames = {}
-for _, m in ipairs(TELEPORT_MAPS) do table.insert(mapNames, m.name) end
-TPT:CreateDropdown({
-	Options = mapNames, Placeholder = "Pilih map...", Flag = "tpMap",
+-- Dropdown menampilkan semua map; hanya map yang cocok dengan PlaceId saat ini yang bisa dipilih.
+selectedMap = detectedMap
+TPT:CreateSection("AUTO SUMMIT")
+local summitMapOptions = {}
+local summitMapLocks = {}
+for _, map in ipairs(TELEPORT_MAPS) do
+	table.insert(summitMapOptions, map.name)
+	summitMapLocks[map.name] = (map ~= detectedMap)
+end
+local summitMapDropdown = TPT:CreateDropdown({
+	Options = summitMapOptions,
+	Default = detectedMap and detectedMap.name or nil,
+	Placeholder = "Pilih map...",
+	DisabledOptions = summitMapLocks,
 	Callback = function(name)
-		selectedMap = findMap(name)
-		Window:Notify("Teleports", "Map: " .. name, 1.5)
+		if not detectedMap or name ~= detectedMap.name then
+			return
+		end
+		selectedMap = detectedMap
 	end,
 })
-
-TPT:CreateSection("Auto Summit")
-if detectedMap then
-	TPT:CreateLabel("MAP TERDETEKSI : " .. detectedMap.name)
-else
-	TPT:CreateLabel("🔒 AUTO SUMMIT TERKUNCI - MAP TIDAK DIDUKUNG")
+if not detectedMap then
+	TPT:CreateLabel("🔒 Pilihan map terkunci — PlaceId tidak cocok")
 end
-TPT:CreateLabel("NOTE : JIKA CP KE SKIP MATI IN AUTO SUMMIT TERUS NYALAIN ULANG")
+TPT:CreateLabel("NOTE : JIKA CP KE-SKIP, MATIKAN AUTO SUMMIT LALU NYALAKAN ULANG")
 summitToggle = TPT:CreateToggle({
-	Name = "Auto Summit", Flag = "autoSummit",
+	Name = detectedMap and "Auto Summit" or "🔒 Auto Summit (Terkunci)",
+	Flag = "autoSummit",
 	Callback = function(s)
 		if not s then
 			summitState = false
 			stopSummitAnim()
 			return
 		end
-		if not detectedMap then
-			Window:Notify("Auto Summit", "🔒 Map ini belum didukung", 3, "error")
-			return false, "Map tidak didukung"
+		if not detectedMap or tonumber(game.PlaceId) == nil
+			or not table.find(detectedMap.placeIds or {}, tonumber(game.PlaceId)) then
+			Window:Notify("Auto Summit", "🔒 Map ini tidak cocok / belum didukung", 3, "error")
+			return false, "Auto Summit terkunci: PlaceId tidak cocok"
 		end
 		selectedMap = detectedMap
 		if autoState then return false, "Matikan Auto TP (Waypoints) dulu" end
