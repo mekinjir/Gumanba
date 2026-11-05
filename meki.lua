@@ -1237,7 +1237,7 @@ function Lib:CreateWindow(cfg)
 end
 
 local REQUIRED_KEY = "MEK-HUB-853"
-local LINKVERTISE_URL = "https://direct-link.net/3821198/3tbpWesAhukf"
+local LINKVERTISE_URL = "https://direct-link.net/3821198/2Kbmdmttpa3S"
 local KEY_FILE = "meki_hub_key.dat"
 local function keySaved()
     if type(readfile) ~= "function" or type(isfile) ~= "function" then return false end
@@ -2036,6 +2036,35 @@ local function findMap(name)
 	end
 end
 
+local detectedMap = nil
+local function detectSupportedMap()
+	local candidates = { tostring(game.Name or "") }
+	local ok, info = pcall(function()
+		return MarketplaceService:GetProductInfo(game.PlaceId)
+	end)
+	if ok and info and info.Name then
+		table.insert(candidates, tostring(info.Name))
+	end
+	local joined = string.lower(table.concat(candidates, " "))
+	local aliases = {
+		["MOUNT FUNKOT"] = { "funkot" },
+		["MOUNT SORRY"] = { "sorry" },
+		["MOUNT SENORIA"] = { "senoria" },
+		["MOUNT SOREYA"] = { "soreya" },
+	}
+	for _, map in ipairs(TELEPORT_MAPS) do
+		for _, token in ipairs(aliases[map.name] or {}) do
+			if string.find(joined, token, 1, true) then
+				return map
+			end
+		end
+	end
+	return nil
+end
+
+detectedMap = detectSupportedMap()
+selectedMap = detectedMap
+
 local function tpTo(pt)
 	local char = player.Character
 	if not char then return false end
@@ -2129,6 +2158,11 @@ TPT:CreateDropdown({
 })
 
 TPT:CreateSection("Auto Summit")
+if detectedMap then
+	TPT:CreateLabel("MAP TERDETEKSI : " .. detectedMap.name)
+else
+	TPT:CreateLabel("🔒 AUTO SUMMIT TERKUNCI - MAP TIDAK DIDUKUNG")
+end
 TPT:CreateLabel("NOTE : JIKA CP KE SKIP MATI IN AUTO SUMMIT TERUS NYALAIN ULANG")
 summitToggle = TPT:CreateToggle({
 	Name = "Auto Summit", Flag = "autoSummit",
@@ -2138,7 +2172,11 @@ summitToggle = TPT:CreateToggle({
 			stopSummitAnim()
 			return
 		end
-		if not selectedMap then return false, "Pilih map dulu" end
+		if not detectedMap then
+			Window:Notify("Auto Summit", "🔒 Map ini belum didukung", 3, "error")
+			return false, "Map tidak didukung"
+		end
+		selectedMap = detectedMap
 		if autoState then return false, "Matikan Auto TP (Waypoints) dulu" end
 
 		summitState = true
