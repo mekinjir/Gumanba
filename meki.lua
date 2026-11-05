@@ -10,11 +10,8 @@ local player = Players.LocalPlayer
 local env = (getgenv and getgenv()) or _G
 
 local MEKI_CONFIG = {
-    DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1567391060815253544/KTpbLpQsx7o4j7SqGqZaoLGNx-IOJV_uEOsg4JFMlUVoLLDs7-XgHF5mefZnLhelRZ34",
     AUTO_EXEC_SCRIPT_URL = "https://raw.githubusercontent.com/mekinjir/Gumanba/main/meki.lua",
-    WEBHOOK_QUOTE_TEXT = "MEKI HUB V3 | Automation Logger",
 }
-local sendWebhook
 
 if env.MekiHub_Cleanup then
 	pcall(env.MekiHub_Cleanup)
@@ -1240,7 +1237,7 @@ function Lib:CreateWindow(cfg)
 end
 
 local REQUIRED_KEY = "MEK-HUB-853"
-local LINKVERTISE_URL = "https://direct-link.net/3821198/2Kbmdmttpa3S"
+local LINKVERTISE_URL = "https://direct-link.net/3821198/3tbpWesAhukf"
 local KEY_FILE = "meki_hub_key.dat"
 local function keySaved()
     if type(readfile) ~= "function" or type(isfile) ~= "function" then return false end
@@ -1601,16 +1598,8 @@ local function setAntiAfk(on)
 	end
 end
 
-addCleanup(RunService.Heartbeat:Connect(function()
-	local char = player.Character
-	local hum = char and char:FindFirstChildOfClass("Humanoid")
-	if hum and not isFlying and hum.Health > 0 then
-		local state = hum:GetState()
-		if state == Enum.HumanoidStateType.Physics or state == Enum.HumanoidStateType.FallingDown or state == Enum.HumanoidStateType.PlatformStanding then
-			hum:ChangeState(Enum.HumanoidStateType.GettingUp)
-		end
-	end
-end))
+-- Tidak memaksa Humanoid ke GettingUp setiap frame saat script dimuat.
+-- Pemaksaan state tersebut dapat mengganggu physics/landing karakter.
 
 addCleanup(RunService.Heartbeat:Connect(function()
 	if not speedEnabled or isFlying then return end
@@ -1619,10 +1608,29 @@ addCleanup(RunService.Heartbeat:Connect(function()
 	if hum and hum.WalkSpeed ~= walkSpeed then hum.WalkSpeed = walkSpeed end
 end))
 
+local DT = Window:CreateTab("Discord", "discord")
+DT:CreateSection("MEKI COMMUNITY")
+DT:CreateLabel("Join komunitas resmi MEKI HUB untuk mendapatkan informasi update, berbagi pengalaman, dan ngobrol bareng pengguna lainnya.")
+DT:CreateLabel("Tekan tombol di bawah untuk menyalin undangan Discord. Link tidak ditampilkan di menu.")
+local discordStatus = DT:CreateLabel("Invite siap disalin.")
+DT:CreateButton({
+    Name = "COPY DISCORD INVITE",
+    Accent = true,
+    Callback = function()
+        local copied = false
+        if type(setclipboard) == "function" then
+            copied = pcall(setclipboard, "https://discord.gg/jDHBUYH6T")
+        elseif type(toclipboard) == "function" then
+            copied = pcall(toclipboard, "https://discord.gg/jDHBUYH6T")
+        end
+        discordStatus.Text = copied and "Invite Discord berhasil disalin!" or "Clipboard tidak didukung executor ini."
+    end,
+})
+
 local HM = Window:CreateTab("Home", "home")
 
 local card = new("Frame", {
-	Size = UDim2.new(1, 0, 0, 88),
+	Size = UDim2.new(1, 0, 0, 72),
 	BackgroundColor3 = Color3.new(1, 1, 1), BorderSizePixel = 0,
 	LayoutOrder = HM:NextOrder(),
 }, HM.Page)
@@ -1647,20 +1655,8 @@ end)
 new("TextLabel", {
 	Text = player.DisplayName, Font = FONTB, TextSize = 16, TextColor3 = T.Text,
 	BackgroundTransparency = 1,
-	Position = UDim2.fromOffset(86, 16), Size = UDim2.new(1, -96, 0, 20),
+	Position = UDim2.fromOffset(86, 25), Size = UDim2.new(1, -96, 0, 22),
 	TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd,
-}, card)
-new("TextLabel", {
-	Text = "@" .. player.Name .. "  |  ID " .. player.UserId, Font = FONT, TextSize = 11, TextColor3 = T.SubText,
-	BackgroundTransparency = 1,
-	Position = UDim2.fromOffset(86, 38), Size = UDim2.new(1, -96, 0, 16),
-	TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd,
-}, card)
-new("TextLabel", {
-	Text = "Umur akun: " .. player.AccountAge .. " hari", Font = FONT, TextSize = 11, TextColor3 = T.Accent,
-	BackgroundTransparency = 1,
-	Position = UDim2.fromOffset(86, 56), Size = UDim2.new(1, -96, 0, 16),
-	TextXAlignment = Enum.TextXAlignment.Left,
 }, card)
 
 HM:CreateSection("Info Server")
@@ -2184,10 +2180,6 @@ summitToggle = TPT:CreateToggle({
 							continue
 						end
 					end
-                    if sendWebhook then
-                        local message = string.format("**Player:** %s (@%s)\n**UserId:** `%s`\n**Map:** %s\n**Status:** Route summit selesai", player.DisplayName, player.Name, tostring(player.UserId), map.name)
-                        task.spawn(function() sendWebhook("AUTO SUMMIT COMPLETED", message, 5763719) end)
-                    end
 					task.wait(map.cycleDelay or 0)
 				end
 				idx = idx + 1
@@ -2570,7 +2562,67 @@ MS:CreateButton({
 	end,
 })
 
-addCleanup(player.CharacterAdded:Connect(function()
+local function applyMekiOverheadName(character)
+    local char = character or player.Character
+    if not char then return end
+    task.spawn(function()
+        local hum = char:FindFirstChildOfClass("Humanoid") or char:WaitForChild("Humanoid", 10)
+        local head = char:FindFirstChild("Head") or char:WaitForChild("Head", 10)
+        if not hum or not head or char ~= player.Character then return end
+        pcall(function()
+            hum.DisplayName = ""
+            hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+        end)
+        local old = head:FindFirstChild("MekiHubOverhead")
+        if old then old:Destroy() end
+        local bill = Instance.new("BillboardGui")
+        bill.Name = "MekiHubOverhead"
+        bill.Adornee = head
+        bill.AlwaysOnTop = true
+        bill.LightInfluence = 0
+        bill.Size = UDim2.fromOffset(150, 34)
+        bill.StudsOffset = Vector3.new(0, 2.65, 0)
+        bill.MaxDistance = 150
+        bill.Parent = head
+        local plate = Instance.new("Frame")
+        plate.Name = "Plate"
+        plate.Size = UDim2.fromScale(1, 1)
+        plate.BackgroundColor3 = Color3.fromRGB(12, 15, 28)
+        plate.BackgroundTransparency = 0.12
+        plate.Parent = bill
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 9)
+        corner.Parent = plate
+        local stroke = Instance.new("UIStroke")
+        stroke.Color = Color3.fromRGB(0, 220, 255)
+        stroke.Thickness = 1.25
+        stroke.Transparency = 0.08
+        stroke.Parent = plate
+        local label = Instance.new("TextLabel")
+        label.Name = "Title"
+        label.BackgroundTransparency = 1
+        label.Size = UDim2.new(1, -8, 1, 0)
+        label.Position = UDim2.fromOffset(4, 0)
+        label.Font = Enum.Font.GothamBold
+        label.Text = "✦ MEKI HUB ✦"
+        label.TextSize = 14
+        label.TextColor3 = Color3.fromRGB(255, 255, 255)
+        label.TextStrokeTransparency = 0.7
+        label.Parent = plate
+        local gradient = Instance.new("UIGradient")
+        gradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 225, 255)),
+            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(235, 245, 255)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 55, 145)),
+        })
+        gradient.Parent = label
+    end)
+end
+
+applyMekiOverheadName(player.Character)
+
+addCleanup(player.CharacterAdded:Connect(function(character)
+	applyMekiOverheadName(character)
 	stopFly()
 	if isNoclip then toggleNoclip(false) end
 	isInfJump = false
@@ -2648,85 +2700,6 @@ local function loadAndIncrementTotalExec()
     return current
 end
 local totalExecCount = loadAndIncrementTotalExec()
-
-local function getHttpRequest()
-    return env.request
-        or env.http_request
-        or (env.syn and env.syn.request)
-        or (env.http and env.http.request)
-end
-
-sendWebhook = function(title, description, color)
-    local url = tostring(MEKI_CONFIG.DISCORD_WEBHOOK_URL or "")
-    if url == "" then return false, "Webhook URL belum diisi di MEKI_CONFIG" end
-    local requestFn = getHttpRequest()
-    if not requestFn then return false, "Executor tidak menyediakan request HTTP" end
-
-    local quoteText = tostring(MEKI_CONFIG.WEBHOOK_QUOTE_TEXT or "")
-    quoteText = quoteText:gsub("\r", ""):gsub("\n", " ")
-    local bodyText = tostring(description or "Aktivitas terdeteksi.")
-    local quoteBlock = quoteText ~= "" and ("> " .. quoteText .. "\n\n") or ""
-    local totalLine = "\n\n**Total Execute:** `" .. tostring(totalExecCount) .. "`"
-
-    local function resolveThumbnail(apiUrl, fallbackUrl)
-        local okThumb, thumbResponse = pcall(function()
-            return requestFn({
-                Url = apiUrl,
-                Method = "GET",
-                Headers = { ["Accept"] = "application/json" },
-            })
-        end)
-        if okThumb and thumbResponse and thumbResponse.Body then
-            local decodedOk, decoded = pcall(function()
-                return HttpService:JSONDecode(thumbResponse.Body)
-            end)
-            if decodedOk and decoded and decoded.data and decoded.data[1]
-                and type(decoded.data[1].imageUrl) == "string" then
-                return decoded.data[1].imageUrl
-            end
-        end
-        return fallbackUrl
-    end
-
-    local avatarFallback = "https://www.roblox.com/headshot-thumbnail/image?userId="
-        .. tostring(player.UserId) .. "&width=420&height=420&format=png"
-    local avatarUrl = resolveThumbnail(
-        "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds="
-            .. tostring(player.UserId) .. "&size=420x420&format=Png&isCircular=false",
-        avatarFallback
-    )
-
-    local embed = {
-        author = {
-            name = tostring(player.Name) .. " • MEKI HUB",
-            icon_url = avatarUrl,
-        },
-        title = tostring(title or "MEKI HUB"),
-        description = quoteBlock .. bodyText .. totalLine,
-        color = color or 3447003,
-        footer = { text = "MEKI HUB V3 • EXECUTION LOGGER" },
-        timestamp = DateTime.now():ToIsoDate(),
-    }
-    local payload = {
-        username = "MEKI HUB LOGGER",
-        avatar_url = avatarUrl,
-        embeds = { embed },
-    }
-    local ok, response = pcall(function()
-        return requestFn({
-            Url = url,
-            Method = "POST",
-            Headers = { ["Content-Type"] = "application/json" },
-            Body = HttpService:JSONEncode(payload),
-        })
-    end)
-    if not ok then return false, tostring(response) end
-    local status = response and (response.StatusCode or response.Status)
-    if status and tonumber(status) and tonumber(status) >= 400 then
-        return false, "Discord HTTP " .. tostring(status)
-    end
-    return true
-end
 
 local function queueMekiOnTeleport()
     local url = tostring(MEKI_CONFIG.AUTO_EXEC_SCRIPT_URL or "")
