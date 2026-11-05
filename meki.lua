@@ -279,6 +279,19 @@ local function makeIcon(kind, parent)
 		box(0, 10, 10, 7, 4)
 		box(11, 4, 5, 5, 3)
 		box(9, 11, 9, 6, 3)
+	elseif kind == "gamepad" then
+		local body = new("Frame", {
+			Position = UDim2.fromOffset(1, 4), Size = UDim2.fromOffset(16, 11),
+			BackgroundColor3 = T.SubText, BorderSizePixel = 0, Rotation = 0,
+		}, holder)
+		round(body, 5)
+		table.insert(fills, body)
+		local d1 = box(4, 7, 2, 6, 1)
+		local d2 = box(2, 9, 6, 2, 1)
+		local b1 = box(11, 7, 2, 2, 1)
+		local b2 = box(14, 9, 2, 2, 1)
+		d1.BackgroundColor3 = T.Bg; d2.BackgroundColor3 = T.Bg
+		b1.BackgroundColor3 = T.Bg; b2.BackgroundColor3 = T.Bg
 	elseif kind == "eye" then
 		local ring = new("Frame", {
 			Position = UDim2.fromOffset(3, 5), Size = UDim2.fromOffset(12, 8),
@@ -499,13 +512,23 @@ function Lib:CreateWindow(cfg)
 		BorderSizePixel = 0,
 	}, sidebar)
 
-	local tabHolder = new("Frame", {
+	-- Sidebar dibuat scrollable supaya semua tab (termasuk Config) selalu bisa diakses.
+	local tabHolder = new("ScrollingFrame", {
+		Name = "TabScroller",
 		Size = UDim2.new(1, 0, 1, -56),
 		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		ScrollBarThickness = 2,
+		ScrollBarImageColor3 = T.Accent,
+		ScrollingDirection = Enum.ScrollingDirection.Y,
+		AutomaticCanvasSize = Enum.AutomaticSize.Y,
+		CanvasSize = UDim2.new(0, 0, 0, 0),
+		ClipsDescendants = true,
 	}, sidebar)
 	new("UIListLayout", {Padding = UDim.new(0, 3), SortOrder = Enum.SortOrder.LayoutOrder}, tabHolder)
 	new("UIPadding", {
-		PaddingTop = UDim.new(0, 10), PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 10),
+		PaddingTop = UDim.new(0, 10), PaddingBottom = UDim.new(0, 8),
+		PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8),
 	}, tabHolder)
 
 	local profile = new("Frame", {
@@ -1640,14 +1663,14 @@ DT:CreateButton({
 })
 end
 
-do -- Home: profil + informasi map/server + waktu script berjalan
+do -- Home: profil, map/server tersusun rapi, dan waktu berjalan
 local HM = Window:CreateTab("Home", "home")
 local homeStartedAt = os.clock()
 
--- Kartu profil: avatar di kiri, nama lalu username dan ID di bawahnya.
+-- Kartu profil: avatar di kiri; username dan ID berada sejajar di bawah display name.
 local profileCard = new("Frame", {
-    Size = UDim2.new(1, 0, 0, 92),
-    BackgroundColor3 = Color3.new(1, 1, 1), BorderSizePixel = 0,
+    Size = UDim2.new(1, 0, 0, 88),
+    BackgroundColor3 = T.Panel, BorderSizePixel = 0,
     LayoutOrder = HM:NextOrder(),
 }, HM.Page)
 round(profileCard, 12)
@@ -1655,13 +1678,12 @@ gradient(profileCard, "card", 20)
 outline(profileCard, T.Stroke, 1, 0.4)
 
 local homeAvatar = new("ImageLabel", {
-    Size = UDim2.fromOffset(64, 64), Position = UDim2.fromOffset(14, 14),
+    Size = UDim2.fromOffset(62, 62), Position = UDim2.fromOffset(13, 13),
     BackgroundColor3 = T.PanelLite, BorderSizePixel = 0,
     ScaleType = Enum.ScaleType.Crop,
 }, profileCard)
-round(homeAvatar, 32)
-local homeAvStroke = outline(homeAvatar, Color3.new(1, 1, 1), 2, 0)
-gradient(homeAvStroke, "seq", 45)
+round(homeAvatar, 31)
+local homeAvStroke = outline(homeAvatar, T.Accent, 2, 0)
 task.spawn(function()
     local ok, img = pcall(function()
         return Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
@@ -1672,52 +1694,52 @@ end)
 new("TextLabel", {
     Text = player.DisplayName, Font = FONTB, TextSize = 16, TextColor3 = T.Text,
     BackgroundTransparency = 1,
-    Position = UDim2.fromOffset(90, 17), Size = UDim2.new(1, -104, 0, 24),
+    Position = UDim2.fromOffset(88, 15), Size = UDim2.new(1, -102, 0, 23),
     TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd,
 }, profileCard)
 new("TextLabel", {
-    Text = "@" .. player.Name, Font = FONT, TextSize = 12, TextColor3 = T.SubText,
+    Text = "@" .. player.Name, Font = FONT, TextSize = 11, TextColor3 = T.SubText,
     BackgroundTransparency = 1,
-    Position = UDim2.fromOffset(90, 43), Size = UDim2.new(1, -104, 0, 18),
+    Position = UDim2.fromOffset(88, 47), Size = UDim2.new(0.48, -88, 0, 18),
     TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd,
 }, profileCard)
 new("TextLabel", {
-    Text = "ID: " .. tostring(player.UserId), Font = FONT, TextSize = 11, TextColor3 = T.SubText,
+    Text = "ID: " .. tostring(player.UserId), Font = FONTB, TextSize = 11, TextColor3 = T.Accent,
     BackgroundTransparency = 1,
-    Position = UDim2.fromOffset(90, 63), Size = UDim2.new(1, -104, 0, 16),
-    TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd,
+    Position = UDim2.new(0.52, 0, 0, 47), Size = UDim2.new(0.48, -14, 0, 18),
+    TextXAlignment = Enum.TextXAlignment.Right, TextTruncate = Enum.TextTruncate.AtEnd,
 }, profileCard)
 
-HM:CreateSection("Informasi Map & Server")
+HM:CreateSection("INFORMASI MAP & SERVER")
 local function homeInfoRow(key, initialValue)
-    local f = new("Frame", {
-        Size = UDim2.new(1, 0, 0, 34),
+    local card = new("Frame", {
+        Size = UDim2.new(1, 0, 0, 46),
         BackgroundColor3 = T.Panel, BorderSizePixel = 0,
         LayoutOrder = HM:NextOrder(),
     }, HM.Page)
-    round(f, 8)
-    outline(f, T.Stroke, 1, 0.6)
+    round(card, 9)
+    outline(card, T.Stroke, 1, 0.65)
     new("TextLabel", {
-        Text = key, Font = FONT, TextSize = 12, TextColor3 = T.SubText,
+        Text = key, Font = FONTB, TextSize = 10, TextColor3 = T.SubText,
         BackgroundTransparency = 1,
-        Position = UDim2.fromOffset(12, 0), Size = UDim2.new(0.42, 0, 1, 0),
+        Position = UDim2.fromOffset(12, 5), Size = UDim2.new(1, -24, 0, 13),
         TextXAlignment = Enum.TextXAlignment.Left,
-    }, f)
+    }, card)
     return new("TextLabel", {
         Text = initialValue or "-", Font = FONTB, TextSize = 12, TextColor3 = T.Text,
         BackgroundTransparency = 1,
-        Position = UDim2.new(0.42, 0, 0, 0), Size = UDim2.new(0.58, -12, 1, 0),
-        TextXAlignment = Enum.TextXAlignment.Right, TextTruncate = Enum.TextTruncate.AtEnd,
-    }, f)
+        Position = UDim2.fromOffset(12, 20), Size = UDim2.new(1, -24, 0, 19),
+        TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd,
+    }, card)
 end
 
-local mapIdLabel = homeInfoRow("ID Map", tostring(game.PlaceId))
-local mapNameLabel = homeInfoRow("Nama Map", "Memuat nama map...")
-local runTimeLabel = homeInfoRow("Lama Script Berjalan", "00:00:00")
-local serverPlayersLabel = homeInfoRow("Pemain Server", tostring(#Players:GetPlayers()) .. "/" .. tostring(Players.MaxPlayers))
-local serverIdLabel = homeInfoRow("ID Server", game.JobId ~= "" and game.JobId or "Studio / Tidak tersedia")
+-- Urutan informasi Home mengikuti susunan yang diminta.
+local mapNameLabel = homeInfoRow("NAMA MAP :", "Memuat nama map...")
+local mapIdLabel = homeInfoRow("ID MAP :", tostring(game.PlaceId))
+local serverPlayersLabel = homeInfoRow("PEMAIN DI SERVER :", tostring(#Players:GetPlayers()) .. "/" .. tostring(Players.MaxPlayers))
+local serverIdLabel = homeInfoRow("ID SERVER :", game.JobId ~= "" and game.JobId or "Studio / Tidak tersedia")
+local runTimeLabel = homeInfoRow("SCRIPT BERJALAN :", "00:00:00")
 
--- Ambil nama experience/map dari Roblox; jika gagal, tetap tampilkan PlaceId.
 task.spawn(function()
     local ok, product = pcall(function()
         return MarketplaceService:GetProductInfo(game.PlaceId)
@@ -1725,7 +1747,7 @@ task.spawn(function()
     if ok and product and product.Name then
         mapNameLabel.Text = tostring(product.Name)
     else
-        mapNameLabel.Text = "Tidak dapat memuat nama map"
+        mapNameLabel.Text = "Nama map tidak tersedia"
     end
 end)
 
@@ -1906,6 +1928,8 @@ task.spawn(function()
     if handler then local ok, result = pcall(require, handler); if ok then FishingMiniGameHandler = result end end
 end)
 task.spawn(function()
+    -- Tap diberi jeda pendek agar input tidak menumpuk dalam frame yang sama
+    -- (beberapa minigame mengabaikan tap yang datang serentak).
     while not isCleaningUp do
         if FishingConfig.Running and tappingRod then
             local status = fishingStatus(tappingRod)
@@ -1913,10 +1937,12 @@ task.spawn(function()
             if not (mini and mini.Value) or os.clock() - miniStartTime > FishingConfig.TapMaxDuration then
                 tappingRod = nil
             else
-                fishingTap(); fishingTap(); fishingTap()
+                fishingTap()
+                task.wait(0.04) -- sekitar 25 tap/detik; lebih responsif dan berjarak konsisten
             end
+        else
+            task.wait(0.03)
         end
-        task.wait()
     end
 end)
 task.spawn(function()
