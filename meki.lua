@@ -1640,300 +1640,115 @@ DT:CreateButton({
 })
 end
 
+do -- Home: profil + informasi map/server + waktu script berjalan
 local HM = Window:CreateTab("Home", "home")
+local homeStartedAt = os.clock()
 
-local card = new("Frame", {
-	Size = UDim2.new(1, 0, 0, 72),
-	BackgroundColor3 = Color3.new(1, 1, 1), BorderSizePixel = 0,
-	LayoutOrder = HM:NextOrder(),
+-- Kartu profil: avatar di kiri, nama lalu username dan ID di bawahnya.
+local profileCard = new("Frame", {
+    Size = UDim2.new(1, 0, 0, 92),
+    BackgroundColor3 = Color3.new(1, 1, 1), BorderSizePixel = 0,
+    LayoutOrder = HM:NextOrder(),
 }, HM.Page)
-round(card, 12)
-gradient(card, "card", 20)
-outline(card, T.Stroke, 1, 0.4)
+round(profileCard, 12)
+gradient(profileCard, "card", 20)
+outline(profileCard, T.Stroke, 1, 0.4)
 
 local homeAvatar = new("ImageLabel", {
-	Size = UDim2.fromOffset(60, 60), Position = UDim2.fromOffset(14, 14),
-	BackgroundColor3 = T.PanelLite, BorderSizePixel = 0,
-}, card)
-round(homeAvatar, 30)
+    Size = UDim2.fromOffset(64, 64), Position = UDim2.fromOffset(14, 14),
+    BackgroundColor3 = T.PanelLite, BorderSizePixel = 0,
+    ScaleType = Enum.ScaleType.Crop,
+}, profileCard)
+round(homeAvatar, 32)
 local homeAvStroke = outline(homeAvatar, Color3.new(1, 1, 1), 2, 0)
 gradient(homeAvStroke, "seq", 45)
 task.spawn(function()
-	local ok, img = pcall(function()
-		return Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
-	end)
-	if ok and homeAvatar.Parent then homeAvatar.Image = img end
+    local ok, img = pcall(function()
+        return Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
+    end)
+    if ok and homeAvatar.Parent then homeAvatar.Image = img end
 end)
 
 new("TextLabel", {
-	Text = player.DisplayName, Font = FONTB, TextSize = 16, TextColor3 = T.Text,
-	BackgroundTransparency = 1,
-	Position = UDim2.fromOffset(86, 25), Size = UDim2.new(1, -96, 0, 22),
-	TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd,
-}, card)
+    Text = player.DisplayName, Font = FONTB, TextSize = 16, TextColor3 = T.Text,
+    BackgroundTransparency = 1,
+    Position = UDim2.fromOffset(90, 17), Size = UDim2.new(1, -104, 0, 24),
+    TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd,
+}, profileCard)
+new("TextLabel", {
+    Text = "@" .. player.Name, Font = FONT, TextSize = 12, TextColor3 = T.SubText,
+    BackgroundTransparency = 1,
+    Position = UDim2.fromOffset(90, 43), Size = UDim2.new(1, -104, 0, 18),
+    TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd,
+}, profileCard)
+new("TextLabel", {
+    Text = "ID: " .. tostring(player.UserId), Font = FONT, TextSize = 11, TextColor3 = T.SubText,
+    BackgroundTransparency = 1,
+    Position = UDim2.fromOffset(90, 63), Size = UDim2.new(1, -104, 0, 16),
+    TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd,
+}, profileCard)
 
-HM:CreateSection("Informasi Akun")
-
-local function infoRow(key)
-	local f = new("Frame", {
-		Size = UDim2.new(1, 0, 0, 32),
-		BackgroundColor3 = T.Panel, BorderSizePixel = 0,
-		LayoutOrder = HM:NextOrder(),
-	}, HM.Page)
-	round(f, 8)
-	outline(f, T.Stroke, 1, 0.6)
-	new("TextLabel", {
-		Text = key, Font = FONT, TextSize = 12, TextColor3 = T.SubText,
-		BackgroundTransparency = 1,
-		Position = UDim2.fromOffset(12, 0), Size = UDim2.new(0.4, 0, 1, 0),
-		TextXAlignment = Enum.TextXAlignment.Left,
-	}, f)
-	return new("TextLabel", {
-		Text = "-", Font = FONTB, TextSize = 12, TextColor3 = T.Text,
-		BackgroundTransparency = 1,
-		Position = UDim2.new(0.4, 0, 0, 0), Size = UDim2.new(0.6, -12, 1, 0),
-		TextXAlignment = Enum.TextXAlignment.Right, TextTruncate = Enum.TextTruncate.AtEnd,
-	}, f)
+HM:CreateSection("Informasi Map & Server")
+local function homeInfoRow(key, initialValue)
+    local f = new("Frame", {
+        Size = UDim2.new(1, 0, 0, 34),
+        BackgroundColor3 = T.Panel, BorderSizePixel = 0,
+        LayoutOrder = HM:NextOrder(),
+    }, HM.Page)
+    round(f, 8)
+    outline(f, T.Stroke, 1, 0.6)
+    new("TextLabel", {
+        Text = key, Font = FONT, TextSize = 12, TextColor3 = T.SubText,
+        BackgroundTransparency = 1,
+        Position = UDim2.fromOffset(12, 0), Size = UDim2.new(0.42, 0, 1, 0),
+        TextXAlignment = Enum.TextXAlignment.Left,
+    }, f)
+    return new("TextLabel", {
+        Text = initialValue or "-", Font = FONTB, TextSize = 12, TextColor3 = T.Text,
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0.42, 0, 0, 0), Size = UDim2.new(0.58, -12, 1, 0),
+        TextXAlignment = Enum.TextXAlignment.Right, TextTruncate = Enum.TextTruncate.AtEnd,
+    }, f)
 end
 
-local displayNameLbl = infoRow("Display Name")
-local usernameLbl = infoRow("Username")
-local accountAgeLbl = infoRow("Umur Akun")
-local userIdLbl = infoRow("ID Akun")
-displayNameLbl.Text = player.DisplayName
-usernameLbl.Text = "@" .. player.Name
-accountAgeLbl.Text = tostring(player.AccountAge) .. " hari"
-userIdLbl.Text = tostring(player.UserId)
+local mapIdLabel = homeInfoRow("ID Map", tostring(game.PlaceId))
+local mapNameLabel = homeInfoRow("Nama Map", "Memuat nama map...")
+local runTimeLabel = homeInfoRow("Lama Script Berjalan", "00:00:00")
+local serverPlayersLabel = homeInfoRow("Pemain Server", tostring(#Players:GetPlayers()) .. "/" .. tostring(Players.MaxPlayers))
+local serverIdLabel = homeInfoRow("ID Server", game.JobId ~= "" and game.JobId or "Studio / Tidak tersedia")
+
+-- Ambil nama experience/map dari Roblox; jika gagal, tetap tampilkan PlaceId.
+task.spawn(function()
+    local ok, product = pcall(function()
+        return MarketplaceService:GetProductInfo(game.PlaceId)
+    end)
+    if ok and product and product.Name then
+        mapNameLabel.Text = tostring(product.Name)
+    else
+        mapNameLabel.Text = "Tidak dapat memuat nama map"
+    end
+end)
+
+local function formatHomeDuration(seconds)
+    seconds = math.max(0, math.floor(seconds))
+    local hours = math.floor(seconds / 3600)
+    local minutes = math.floor((seconds % 3600) / 60)
+    local secs = seconds % 60
+    return string.format("%02d:%02d:%02d", hours, minutes, secs)
+end
+
+task.spawn(function()
+    while not isCleaningUp and runTimeLabel.Parent do
+        runTimeLabel.Text = formatHomeDuration(os.clock() - homeStartedAt)
+        serverPlayersLabel.Text = tostring(#Players:GetPlayers()) .. "/" .. tostring(Players.MaxPlayers)
+        task.wait(1)
+    end
+end)
+end -- Home
 
 local MAIN = Window:CreateTab("Main", "gamepad")
 
-do -- [fix] blok GitHub stats + fishing (kurangi local di level atas)
--- GitHub Contents API: statistik bersama berdasarkan Roblox UserId.
-local GITHUB_STATS = {
-    OWNER = "mekinjir",
-    REPO = "MEKI-HUB",
-    BRANCH = "main",
-    PATH = "data/fish-stats.json",
-    TOKEN = "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",
-}
-local FISH_COUNT_FILE = "MekiHub_FishCount_" .. tostring(player.UserId) .. ".txt"
-local totalFishCaught, pendingFishDelta = 0, 0
-local githubStatsReady, githubStatsBusy = false, false
-local githubStatsSha = nil
-
-pcall(function()
-    if hasFileAPI() and isfile(FISH_COUNT_FILE) then
-        totalFishCaught = math.max(0, math.floor(tonumber(readfile(FISH_COUNT_FILE)) or 0))
-    end
-end)
-local function saveFishCount()
-    if hasFileAPI() then pcall(function() writefile(FISH_COUNT_FILE, tostring(totalFishCaught)) end) end
-end
-
-local function b64Encode(data)
-    local chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-    local out, i = {}, 1
-    while i <= #data do
-        local a, b, c = data:byte(i, i + 2)
-        local n = (a or 0) * 65536 + (b or 0) * 256 + (c or 0)
-        local x1 = math.floor(n / 262144) % 64 + 1
-        local x2 = math.floor(n / 4096) % 64 + 1
-        local x3 = math.floor(n / 64) % 64 + 1
-        local x4 = n % 64 + 1
-        out[#out + 1] = chars:sub(x1, x1)
-        out[#out + 1] = chars:sub(x2, x2)
-        out[#out + 1] = b and chars:sub(x3, x3) or "="
-        out[#out + 1] = c and chars:sub(x4, x4) or "="
-        i = i + 3
-    end
-    return table.concat(out)
-end
-
-local function b64Decode(data)
-    local chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-    data = tostring(data or ""):gsub("%s", "")
-    local out, buffer, bits = {}, 0, 0
-    for i = 1, #data do
-        local ch = data:sub(i, i)
-        if ch == "=" then break end
-        local value = chars:find(ch, 1, true)
-        if value then
-            buffer = buffer * 64 + value - 1
-            bits = bits + 6
-            if bits >= 8 then
-                bits = bits - 8
-                local byte = math.floor(buffer / 2^bits) % 256
-                out[#out + 1] = string.char(byte)
-                buffer = buffer % 2^bits
-            end
-        end
-    end
-    return table.concat(out)
-end
-
-local function githubRequest(method, url, body)
-    local requestFn = env.request or env.http_request or env.httprequest
-        or (env.syn and env.syn.request)
-    if type(requestFn) ~= "function" then return false, "Executor tidak support request()" end
-    if GITHUB_STATS.TOKEN == "" or GITHUB_STATS.TOKEN == "PASTE_GITHUB_TOKEN_HERE" then
-        return false, "Isi GITHUB_STATS.TOKEN di script"
-    end
-    local headers = {
-        Authorization = "Bearer " .. GITHUB_STATS.TOKEN,
-        Accept = "application/vnd.github+json",
-        ["X-GitHub-Api-Version"] = "2022-11-28",
-        ["User-Agent"] = "MEKI-HUB",
-    }
-    if body then headers["Content-Type"] = "application/json" end
-    local ok, response = pcall(requestFn, {
-        Url = url, Method = method, Headers = headers,
-        Body = body and HttpService:JSONEncode(body) or nil,
-    })
-    if not ok or type(response) ~= "table" then return false, tostring(response) end
-    local code = tonumber(response.StatusCode or response.Status or 0) or 0
-    local raw = response.Body or response.body or ""
-    if code < 200 or code >= 300 then
-        return false, "GitHub HTTP " .. code .. ": " .. tostring(raw):sub(1, 160), code
-    end
-    local parsed, result = pcall(HttpService.JSONDecode, HttpService, raw)
-    if not parsed or type(result) ~= "table" then return false, "Respons GitHub tidak valid" end
-    return true, result
-end
-
-local function githubFileUrl()
-    return "https://api.github.com/repos/" .. GITHUB_STATS.OWNER .. "/"
-        .. GITHUB_STATS.REPO .. "/contents/" .. GITHUB_STATS.PATH
-end
-
-local function githubReadStats()
-    local ok, result, code = githubRequest("GET", githubFileUrl() .. "?ref=" .. GITHUB_STATS.BRANCH)
-    if not ok then
-        if code == 404 then return true, {}, nil end
-        return false, result
-    end
-    githubStatsSha = result.sha
-    local raw = b64Decode(result.content or "")
-    if raw == "" then return true, {}, githubStatsSha end
-    local parsed, data = pcall(HttpService.JSONDecode, HttpService, raw)
-    if not parsed or type(data) ~= "table" then return false, "JSON statistik GitHub tidak valid" end
-    return true, data, githubStatsSha
-end
-
-local function githubWriteStats(data, sha)
-    local body = {
-        message = "MEKI HUB fish stats / UserId " .. tostring(player.UserId),
-        content = b64Encode(HttpService:JSONEncode(data)),
-        branch = GITHUB_STATS.BRANCH,
-    }
-    if sha then body.sha = sha end
-    local ok, result = githubRequest("PUT", githubFileUrl(), body)
-    if not ok then return false, result end
-    githubStatsSha = result.content and result.content.sha or nil
-    return true
-end
-
-local function githubUserCount(data)
-    local row = data[tostring(player.UserId)]
-    if type(row) == "table" then return math.max(0, math.floor(tonumber(row.totalCatch) or 0)) end
-    return math.max(0, math.floor(tonumber(row) or 0))
-end
-
-MAIN:CreateSection("Statistik Farm — Mount Soreya")
-local fishCountCard = new("Frame", {
-    Size = UDim2.new(1, 0, 0, 76), BackgroundColor3 = T.Panel,
-    BorderSizePixel = 0, LayoutOrder = MAIN:NextOrder(),
-}, MAIN.Page)
-round(fishCountCard, 9)
-outline(fishCountCard, T.Stroke, 1, 0.5)
-new("TextLabel", {
-    Text = "TOTAL TANGKAPAN IKAN", Font = FONTB, TextSize = 11,
-    TextColor3 = T.Accent, BackgroundTransparency = 1,
-    Position = UDim2.fromOffset(12, 7), Size = UDim2.new(1, -24, 0, 16),
-    TextXAlignment = Enum.TextXAlignment.Left,
-}, fishCountCard)
-local fishCountLabel = new("TextLabel", {
-    Text = tostring(totalFishCaught), Font = FONTB, TextSize = 22,
-    TextColor3 = T.Text, BackgroundTransparency = 1,
-    Position = UDim2.fromOffset(12, 24), Size = UDim2.new(1, -24, 0, 27),
-    TextXAlignment = Enum.TextXAlignment.Left,
-}, fishCountCard)
-local fishSyncLabel = new("TextLabel", {
-    Text = "Menghubungkan GitHub...", Font = FONT, TextSize = 9,
-    TextColor3 = T.SubText, BackgroundTransparency = 1,
-    Position = UDim2.fromOffset(12, 52), Size = UDim2.new(1, -24, 0, 16),
-    TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd,
-}, fishCountCard)
-MAIN:CreateLabel("Statistik tersimpan di GitHub berdasarkan UserId. Tangkapan manual dan Auto Fishing dihitung dari event GotFish.")
-if game.PlaceId ~= 118517641508250 then fishCountCard.Visible = false end
-
-local function fishSyncStatus(message, failed)
-    if fishSyncLabel and fishSyncLabel.Parent then
-        fishSyncLabel.Text = tostring(message)
-        fishSyncLabel.TextColor3 = failed and T.Danger or T.SubText
-    end
-end
-
-local function githubInitialSync()
-    local ok, data, sha = githubReadStats()
-    if not ok then fishSyncStatus(data, true); return false end
-    githubStatsSha = sha
-    totalFishCaught = githubUserCount(data)
-    saveFishCount()
-    fishCountLabel.Text = tostring(totalFishCaught)
-    githubStatsReady = true
-    fishSyncStatus("Tersinkron • UserId " .. tostring(player.UserId), false)
-    return true
-end
-
-local function queueFishCatch()
-    totalFishCaught = totalFishCaught + 1
-    pendingFishDelta = pendingFishDelta + 1
-    fishCountLabel.Text = tostring(totalFishCaught)
-    saveFishCount()
-    fishSyncStatus("Menunggu sinkronisasi GitHub...", false)
-end
-
-task.spawn(function()
-    task.wait(1)
-    if game.PlaceId == 118517641508250 then githubInitialSync() end
-end)
-
-task.spawn(function()
-    while not isCleaningUp do
-        task.wait(5)
-        if pendingFishDelta > 0 and not githubStatsBusy then
-            githubStatsBusy = true
-            if not githubStatsReady then githubInitialSync() end
-            if githubStatsReady then
-                local batch = pendingFishDelta
-                local okRead, data, sha = githubReadStats()
-                if okRead then
-                    local newTotal = githubUserCount(data) + batch
-                    data[tostring(player.UserId)] = {
-                        totalCatch = newTotal,
-                        username = player.Name,
-                        displayName = player.DisplayName,
-                        updatedAt = os.time(),
-                    }
-                    local okWrite, err = githubWriteStats(data, sha)
-                    if okWrite then
-                        pendingFishDelta = math.max(0, pendingFishDelta - batch)
-                        totalFishCaught = newTotal
-                        saveFishCount()
-                        fishCountLabel.Text = tostring(totalFishCaught)
-                        fishSyncStatus("Tersinkron • " .. tostring(totalFishCaught) .. " ikan", false)
-                    else
-                        fishSyncStatus("Gagal simpan: " .. tostring(err), true)
-                    end
-                else
-                    fishSyncStatus("Gagal baca: " .. tostring(data), true)
-                end
-            end
-            githubStatsBusy = false
-        end
-    end
-end)
-
+do -- Blok fitur Main/Fishing untuk menjaga batas local Luau.
 MAIN:CreateSection("Teleport Lokasi Soreya")
 local soreyaSpots = {
     { name = "Spot Core", cf = { -9098.5166015625,1247.6292724609376,-6603.39892578125,0.1252012848854065,-5.0581160593310418e-8,0.9921313524246216,-1.0390964177986462e-7,1,6.409512565141995e-8,-0.9921313524246216,-1.1111680464637175e-7,0.1252012848854065 } },
@@ -2053,7 +1868,6 @@ local function fishingHookRod(rod)
         elseif action == "NoFishingZone" then
             FishingStatus.phase, FishingStatus.message = "error", "Bukan zona mancing!"
         elseif action == "GotFish" then
-            queueFishCatch()
             local name = type(data) == "table" and (data.baseName or data.originalName) or "ikan"
             FishingStatus.phase, FishingStatus.message = "got", "Dapet: " .. tostring(name)
         elseif action == "FishingCanceled" then
@@ -2161,7 +1975,7 @@ fishingToggle = MAIN:CreateToggle({ Name = "Auto Fishing", Flag = "autoFishing",
     if not enabled then fishingFireCast("cancel"); fishingSince = 0; fishingBusy = false; tappingRod = nil end
 end })
 MAIN:CreateLabel("Auto cast, auto tap minigame, auto collect, dan recast otomatis.")
-end -- [fix] tutup blok GitHub stats + fishing
+end -- tutup blok fitur Main/Fishing
 
 local frames, acc = 0, 0
 addCleanup(RunService.RenderStepped:Connect(function(dt)
@@ -2176,7 +1990,6 @@ local function getPing()
 	return ok and math.floor(v) or 0
 end
 
-local startClock = os.clock()
 task.spawn(function()
 	while not isCleaningUp do
 		task.wait(0.5)
@@ -2184,13 +1997,7 @@ task.spawn(function()
 		local fps = (acc > 0) and math.floor(frames / acc + 0.5) or 0
 		frames, acc = 0, 0
 		local ping = getPing()
-		local secs = math.floor(os.clock() - startClock)
-		local h, m, s = math.floor(secs / 3600), math.floor(secs % 3600 / 60), secs % 60
 
-		fpsLbl.Text = fps .. " FPS"
-		pingLbl.Text = ping .. " ms"
-		playersLbl.Text = #Players:GetPlayers() .. " / " .. Players.MaxPlayers
-		timeLbl.Text = string.format("%02d:%02d:%02d", h, m, s)
 		Window.StatsLabel.Text = fps .. " FPS  |  " .. ping .. " ms"
 	end
 end)
