@@ -1659,7 +1659,7 @@ new("TextLabel", {
 	TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd,
 }, card)
 
-HM:CreateSection("Info Server")
+HM:CreateSection("Informasi Akun")
 
 local function infoRow(key)
 	local f = new("Frame", {
@@ -1683,19 +1683,242 @@ local function infoRow(key)
 	}, f)
 end
 
-local mapLbl     = infoRow("Map")
-local placeLbl   = infoRow("Place ID")
-local playersLbl = infoRow("Pemain")
-local fpsLbl     = infoRow("FPS")
-local pingLbl    = infoRow("Ping")
-local timeLbl    = infoRow("Durasi Sesi")
+local displayNameLbl = infoRow("Display Name")
+local usernameLbl = infoRow("Username")
+local accountAgeLbl = infoRow("Umur Akun")
+local userIdLbl = infoRow("ID Akun")
+displayNameLbl.Text = player.DisplayName
+usernameLbl.Text = "@" .. player.Name
+accountAgeLbl.Text = tostring(player.AccountAge) .. " hari"
+userIdLbl.Text = tostring(player.UserId)
 
-placeLbl.Text = tostring(game.PlaceId)
-mapLbl.Text = game.Name
+local MAIN = Window:CreateTab("Main", "gamepad")
+MAIN:CreateSection("Teleport Lokasi Soreya")
+local soreyaSpots = {
+    { name = "Spot Core", cf = { -9098.5166015625,1247.6292724609376,-6603.39892578125,0.1252012848854065,-5.0581160593310418e-8,0.9921313524246216,-1.0390964177986462e-7,1,6.409512565141995e-8,-0.9921313524246216,-1.1111680464637175e-7,0.1252012848854065 } },
+    { name = "Spot Mancing", cf = { -8189.32861328125,1231.3775634765626,-6330.47412109375,-0.9817370772361755,-2.8695961162839014e-9,0.19024276733398438,3.735683318240035e-9,1,3.436164774939243e-8,-0.19024276733398438,3.44447919076174e-8,-0.9817370772361755 } },
+    { name = "Toko Rod", cf = { -6636.59130859375,1312.6998291015626,-9858.712890625,0.029465658590197564,7.197397167146846e-8,-0.9995657801628113,2.392196662981405e-9,1,7.20757569183661e-8,0.9995657801628113,-4.514917772979743e-9,0.029465658590197564 } },
+    { name = "Jual Ikan", cf = { -6668.09814453125,1312.6998291015626,-9967.224609375,0.9998033046722412,-6.721883494265058e-8,0.019832737743854524,6.688499354368105e-8,1,1.749616274082655e-8,-0.019832737743854524,-1.616620792788126e-8,0.9998033046722412 } },
+    { name = "Base Camp", cf = { 469.4512939453125,444.6799621582031,-8628.8466796875,-0.9995255470275879,-1.6204634079031167e-8,0.030799703672528268,-1.6316988649123233e-8,1,-3.3965226187149257e-9,-0.030799703672528268,-3.8974694582805113e-9,-0.9995255470275879 } },
+}
+for _, spot in ipairs(soreyaSpots) do spot.cframe = CFrame.new(unpack(spot.cf)) end
+local selectedSoreyaSpot = soreyaSpots[1]
+MAIN:CreateDropdown({
+    Options = { "Spot Core", "Spot Mancing", "Toko Rod", "Jual Ikan", "Base Camp" },
+    Placeholder = "Pilih lokasi teleport...",
+    Callback = function(name)
+        for _, spot in ipairs(soreyaSpots) do
+            if spot.name == name then selectedSoreyaSpot = spot break end
+        end
+    end,
+})
+MAIN:CreateButton({ Name = "Teleport ke Lokasi", Accent = true, Callback = function()
+    if game.PlaceId ~= 118517641508250 then
+        Window:Notify("Teleport", "Fitur lokasi ini khusus Mount Soreya", 2, "error")
+        return
+    end
+    local char = player.Character
+    if char and selectedSoreyaSpot then
+        char:PivotTo(selectedSoreyaSpot.cframe)
+        local root = char:FindFirstChild("HumanoidRootPart")
+        if root then root.AssemblyLinearVelocity = Vector3.zero end
+        resetHumanoidState()
+        Window:Notify("Teleport", "Menuju " .. selectedSoreyaSpot.name, 1.5, "success")
+    end
+end })
+
+MAIN:CreateSection("Meow Fishing")
+local FishingConfig = { Running = false, Power = 100, BiteTimeout = 30, CollectInterval = 2, TapMaxDuration = 15 }
+local FishingStatus = { phase = "idle", message = "Idle" }
+local fishingBusy, fishingSince, lastCollect, tappingRod, miniStartTime = false, 0, 0, nil, 0
+local hookedFishingRods = {}
+local FishingMiniGameHandler
+local FishingRS = game:GetService("ReplicatedStorage")
+local FishingVIM = game:GetService("VirtualInputManager")
+local FishingLP = player
+local function fishingGetCastWait() return 2.15 end
+local function fishingIsRod(tool)
+    if not tool or not tool:IsA("Tool") then return false end
+    local mechanics = tool:FindFirstChild("Mechanics")
+    local remotes = mechanics and mechanics:FindFirstChild("Remotes")
+    return remotes and remotes:FindFirstChild("CastEvent") ~= nil
+end
+local function fishingFindRod()
+    local char = FishingLP.Character
+    if char then for _, item in ipairs(char:GetChildren()) do if fishingIsRod(item) then return item, true end end end
+    local bp = FishingLP:FindFirstChildOfClass("Backpack")
+    if bp then for _, item in ipairs(bp:GetChildren()) do if fishingIsRod(item) then return item, false end end end
+    return nil, false
+end
+local function fishingRemotes(rod)
+    local mechanics = rod and rod:FindFirstChild("Mechanics")
+    local remotes = mechanics and mechanics:FindFirstChild("Remotes")
+    if not remotes then return nil end
+    return { Cast = remotes:FindFirstChild("CastEvent"), Notif = remotes:FindFirstChild("NotifyClient") }
+end
+local function fishingStatus(rod)
+    local mechanics = rod and rod:FindFirstChild("Mechanics")
+    return mechanics and mechanics:FindFirstChild("Status")
+end
+local function fishingDirection()
+    local char = FishingLP.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not root then return Vector3.new(0,0,-1) end
+    local look = root.CFrame.LookVector
+    local flat = Vector3.new(look.X,0,look.Z)
+    return flat.Magnitude < 0.1 and Vector3.new(0,0,-1) or flat.Unit
+end
+local function fishingEquipRod()
+    local rod, equipped = fishingFindRod()
+    if rod and not equipped then
+        local char = FishingLP.Character
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        if hum then pcall(function() hum:EquipTool(rod) end) end
+    end
+end
+local function fishingCollectAll()
+    local remote = FishingRS:FindFirstChild("Remote")
+    local inv = remote and remote:FindFirstChild("Inventaris")
+    local collect = inv and inv:FindFirstChild("AmbilSemua")
+    if collect then pcall(function() collect:InvokeServer() end) end
+end
+local function fishingTap()
+    if FishingMiniGameHandler and typeof(FishingMiniGameHandler.MobileTap) == "function" then
+        pcall(function() FishingMiniGameHandler.MobileTap() end)
+    elseif typeof(mouse1click) == "function" then
+        pcall(mouse1click)
+    elseif FishingVIM then
+        local cam = workspace.CurrentCamera
+        if cam then
+            local vp = cam.ViewportSize
+            pcall(function()
+                FishingVIM:SendMouseButtonEvent(vp.X/2,vp.Y/2,0,true,game,1)
+                FishingVIM:SendMouseButtonEvent(vp.X/2,vp.Y/2,0,false,game,1)
+            end)
+        end
+    end
+end
+local function fishingHookRod(rod)
+    if hookedFishingRods[rod] then return end
+    local remotes = fishingRemotes(rod)
+    if not remotes or not remotes.Notif then return end
+    hookedFishingRods[rod] = true
+    remotes.Notif.OnClientEvent:Connect(function(action, data)
+        if action == "Bite" then
+            FishingStatus.phase, FishingStatus.message = "bite", "Ikan narik!"
+        elseif action == "CastFailed" then
+            local reason = type(data) == "table" and data.reason or tostring(data)
+            FishingStatus.phase, FishingStatus.message = "error", "Cast failed: " .. tostring(reason)
+        elseif action == "NoFishingZone" then
+            FishingStatus.phase, FishingStatus.message = "error", "Bukan zona mancing!"
+        elseif action == "GotFish" then
+            local name = type(data) == "table" and (data.baseName or data.originalName) or "ikan"
+            FishingStatus.phase, FishingStatus.message = "got", "Dapet: " .. tostring(name)
+        elseif action == "FishingCanceled" then
+            FishingStatus.phase, FishingStatus.message = "idle", "Server cancel"
+        end
+    end)
+end
+local function fishingFireCast(value, power)
+    local rod = fishingFindRod()
+    local remotes = rod and fishingRemotes(rod)
+    if remotes and remotes.Cast then
+        if value == "start" then pcall(function() remotes.Cast:FireServer(true) end)
+        elseif value == "release" then pcall(function() remotes.Cast:FireServer(false, power or FishingConfig.Power, fishingDirection()) end)
+        else pcall(function() remotes.Cast:FireServer(false, 0) end) end
+    end
+end
+local function fishingDoCast()
+    if fishingBusy then return end
+    fishingBusy = true
+    FishingStatus.phase, FishingStatus.message = "charging", "Charging..."
+    fishingFireCast("start")
+    task.wait(fishingGetCastWait())
+    if not FishingConfig.Running or isCleaningUp then fishingBusy = false return end
+    FishingStatus.phase, FishingStatus.message = "casting", "Reeling out..."
+    fishingFireCast("release")
+    task.wait(0.1)
+    fishingSince = os.clock()
+    FishingStatus.phase, FishingStatus.message = "waiting", "Nunggu ikan narik..."
+    fishingBusy = false
+end
+
 task.spawn(function()
-	local ok, info = pcall(function() return MarketplaceService:GetProductInfo(game.PlaceId) end)
-	if ok and info and info.Name and mapLbl.Parent then mapLbl.Text = info.Name end
+    local modules = FishingRS:WaitForChild("Modules", 10)
+    local fishing = modules and modules:WaitForChild("Fishing", 10)
+    local handler = fishing and fishing:WaitForChild("MiniGameHandler", 10)
+    if handler then local ok, result = pcall(require, handler); if ok then FishingMiniGameHandler = result end end
 end)
+task.spawn(function()
+    while not isCleaningUp do
+        if FishingConfig.Running and tappingRod then
+            local status = fishingStatus(tappingRod)
+            local mini = status and status:FindFirstChild("MiniGameActive")
+            if not (mini and mini.Value) or os.clock() - miniStartTime > FishingConfig.TapMaxDuration then
+                tappingRod = nil
+            else
+                fishingTap(); fishingTap(); fishingTap()
+            end
+        end
+        task.wait()
+    end
+end)
+task.spawn(function()
+    while not isCleaningUp do
+        task.wait(0.1)
+        if not FishingConfig.Running then
+            FishingStatus.phase, FishingStatus.message = "idle", "Idle"
+            tappingRod = nil
+            continue
+        end
+        local rod, equipped = fishingFindRod()
+        if not rod then FishingStatus.phase, FishingStatus.message = "error", "Rod gak ada"; continue end
+        if not equipped then FishingStatus.message = "Auto-equip..."; fishingEquipRod(); continue end
+        fishingHookRod(rod)
+        local status = fishingStatus(rod)
+        if not status then continue end
+        local active = status:FindFirstChild("FishingActive")
+        local mini = status:FindFirstChild("MiniGameActive")
+        local isFishing = active and active.Value or false
+        local isMini = mini and mini.Value or false
+        if isMini then
+            FishingStatus.phase, FishingStatus.message = "minigame", "Minigame — auto tap!"
+            if not tappingRod then tappingRod = rod; miniStartTime = os.clock() end
+            fishingSince = 0
+            continue
+        end
+        tappingRod = nil
+        if isFishing then
+            FishingStatus.phase = "waiting"
+            if fishingSince == 0 then fishingSince = os.clock() end
+            if os.clock() - fishingSince > FishingConfig.BiteTimeout then
+                FishingStatus.message = "Timeout — recast"
+                fishingFireCast("cancel")
+                fishingSince = 0
+                task.wait(0.5)
+            end
+            continue
+        end
+        fishingSince = 0
+        if not fishingBusy then task.spawn(fishingDoCast) end
+    end
+end)
+task.spawn(function()
+    while not isCleaningUp do
+        task.wait(1)
+        if FishingConfig.Running and os.clock() - lastCollect >= FishingConfig.CollectInterval then
+            lastCollect = os.clock()
+            fishingCollectAll()
+        end
+    end
+end)
+local fishingToggle
+fishingToggle = MAIN:CreateToggle({ Name = "Auto Fishing", Flag = "autoFishing", Callback = function(enabled)
+    if enabled and game.PlaceId ~= 118517641508250 then return false, "Auto Fishing khusus Mount Soreya" end
+    FishingConfig.Running = enabled
+    if not enabled then fishingFireCast("cancel"); fishingSince = 0; fishingBusy = false; tappingRod = nil end
+end })
+MAIN:CreateLabel("Auto cast, auto tap minigame, auto collect, dan recast otomatis.")
 
 local frames, acc = 0, 0
 addCleanup(RunService.RenderStepped:Connect(function(dt)
@@ -1950,6 +2173,8 @@ end
 local TELEPORT_MAPS = {
 	{
 		name = "MOUNT FUNKOT",
+		placeIds = { 78842106567506 }, -- Place ID Mount Funkot
+
 		points = {
 			{ name = "cp 1", cf = { -8.677769660949707, 4.69999885559082, 836.5045166015625, -0.9564000964164734, 6.390950346712998e-8, 0.2920597791671753, 5.421065907285083e-8, 1, -4.130121666889863e-8, -0.2920597791671753, -2.3667734438959088e-8, -0.9564000964164734 } },
 			{ name = "summit", cf = { -4221.38037109375, 2980.21435546875, 21684.75, -0.9715039730072022, 2.5034383455135868e-9, 0.23702339828014375, 4.351584426132149e-9, 1, 7.274146618385657e-9, -0.23702339828014375, 8.098289150382243e-9, -0.9715039730072022 } },
@@ -1958,6 +2183,8 @@ local TELEPORT_MAPS = {
 	},
 	{
 		name = "MOUNT SORRY",
+		placeIds = { 139142243919159 }, -- Place ID Mount Sorry
+
 
 		finishRemote = { "LavaSummitKit", "Remotes", "ResetCheckpoint" },
 		points = {
@@ -1981,6 +2208,8 @@ local TELEPORT_MAPS = {
 	},
 	{
 		name = "MOUNT SENORIA",
+		placeIds = { 134551551665645 }, -- Place ID Mount Senoria
+
 		finishRemote = { "ValuableRecallSystem", "RequestRecall" },
 		recallAfterFinish = true,
 		points = {
@@ -1990,6 +2219,8 @@ local TELEPORT_MAPS = {
 	},
 	{
 		name = "MOUNT SOREYA",
+		placeIds = { 118517641508250 }, -- Place ID Mount Soreya
+
 
 		cycleDelay = 2,
 		points = {
@@ -2038,23 +2269,10 @@ end
 
 local detectedMap = nil
 local function detectSupportedMap()
-	local candidates = { tostring(game.Name or "") }
-	local ok, info = pcall(function()
-		return MarketplaceService:GetProductInfo(game.PlaceId)
-	end)
-	if ok and info and info.Name then
-		table.insert(candidates, tostring(info.Name))
-	end
-	local joined = string.lower(table.concat(candidates, " "))
-	local aliases = {
-		["MOUNT FUNKOT"] = { "funkot" },
-		["MOUNT SORRY"] = { "sorry" },
-		["MOUNT SENORIA"] = { "senoria" },
-		["MOUNT SOREYA"] = { "soreya" },
-	}
+	local currentPlaceId = tonumber(game.PlaceId)
 	for _, map in ipairs(TELEPORT_MAPS) do
-		for _, token in ipairs(aliases[map.name] or {}) do
-			if string.find(joined, token, 1, true) then
+		for _, placeId in ipairs(map.placeIds or {}) do
+			if tonumber(placeId) == currentPlaceId then
 				return map
 			end
 		end
