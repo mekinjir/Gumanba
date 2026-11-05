@@ -1256,13 +1256,15 @@ local function saveKey()
     if type(writefile) == "function" then pcall(writefile, KEY_FILE, REQUIRED_KEY) end
 end
 
-local loadingScreen = new("Frame", {
+local loadingScreen, loadBox, loadSpin
+do
+loadingScreen = new("Frame", {
 	Size = UDim2.fromScale(1, 1),
 	BackgroundColor3 = T.Bg, BackgroundTransparency = 0.1,
 	ZIndex = 100,
 }, gui)
 
-local loadBox = new("Frame", {
+loadBox = new("Frame", {
 	Size = UDim2.fromOffset(300, 220),
 	Position = UDim2.fromScale(0.5, 0.5), AnchorPoint = Vector2.new(0.5, 0.5),
 	BackgroundColor3 = T.Panel, BackgroundTransparency = 0.2,
@@ -1270,7 +1272,7 @@ local loadBox = new("Frame", {
 round(loadBox, 16)
 local loadStroke = outline(loadBox, Color3.new(1, 1, 1), 1.5, 0.3)
 local loadStrokeGrad = gradient(loadStroke, "loop", 0)
-local loadSpin = RunService.Heartbeat:Connect(function(dt)
+loadSpin = RunService.Heartbeat:Connect(function(dt)
 	loadStrokeGrad.Rotation = (loadStrokeGrad.Rotation + dt * 120) % 360
 end)
 addCleanup(loadSpin)
@@ -1329,6 +1331,7 @@ task.spawn(function()
 	end
 end)
 
+end
 local Window = Lib:CreateWindow({
 	Title = "MEKI HUB",
 	Badge = "V3 FREEMIUM",
@@ -1616,6 +1619,7 @@ addCleanup(RunService.Heartbeat:Connect(function()
 	if hum and hum.WalkSpeed ~= walkSpeed then hum.WalkSpeed = walkSpeed end
 end))
 
+do
 local DT = Window:CreateTab("Discord", "discord")
 DT:CreateSection("MEKI COMMUNITY")
 DT:CreateLabel("Join komunitas resmi MEKI HUB untuk mendapatkan informasi update, berbagi pengalaman, dan ngobrol bareng pengguna lainnya.")
@@ -1634,6 +1638,7 @@ DT:CreateButton({
         discordStatus.Text = copied and "Invite Discord berhasil disalin!" or "Clipboard tidak didukung executor ini."
     end,
 })
+end
 
 local HM = Window:CreateTab("Home", "home")
 
@@ -2265,7 +2270,6 @@ end
 
 local TPT = Window:CreateTab("Teleports", "flag")
 local selectedMap
-local summitDelay = 0.5
 local summitRun = 0
 local summitToggle
 
@@ -2344,9 +2348,6 @@ local function startSummitAnim()
     end)
 end
 
-local function getSummitCheckpointWait()
-    return 0.8
-end
 
 local function reachSummitPoint(point)
     if not summitState or isCleaningUp then return false end
@@ -2826,67 +2827,8 @@ MS:CreateButton({
 	end,
 })
 
-local function applyMekiOverheadName(character)
-    local char = character or player.Character
-    if not char then return end
-    task.spawn(function()
-        local hum = char:FindFirstChildOfClass("Humanoid") or char:WaitForChild("Humanoid", 10)
-        local head = char:FindFirstChild("Head") or char:WaitForChild("Head", 10)
-        if not hum or not head or char ~= player.Character then return end
-        pcall(function()
-            hum.DisplayName = ""
-            hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
-        end)
-        local old = head:FindFirstChild("MekiHubOverhead")
-        if old then old:Destroy() end
-        local bill = Instance.new("BillboardGui")
-        bill.Name = "MekiHubOverhead"
-        bill.Adornee = head
-        bill.AlwaysOnTop = true
-        bill.LightInfluence = 0
-        bill.Size = UDim2.fromOffset(150, 34)
-        bill.StudsOffset = Vector3.new(0, 2.65, 0)
-        bill.MaxDistance = 150
-        bill.Parent = head
-        local plate = Instance.new("Frame")
-        plate.Name = "Plate"
-        plate.Size = UDim2.fromScale(1, 1)
-        plate.BackgroundColor3 = Color3.fromRGB(12, 15, 28)
-        plate.BackgroundTransparency = 0.12
-        plate.Parent = bill
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 9)
-        corner.Parent = plate
-        local stroke = Instance.new("UIStroke")
-        stroke.Color = Color3.fromRGB(0, 220, 255)
-        stroke.Thickness = 1.25
-        stroke.Transparency = 0.08
-        stroke.Parent = plate
-        local label = Instance.new("TextLabel")
-        label.Name = "Title"
-        label.BackgroundTransparency = 1
-        label.Size = UDim2.new(1, -8, 1, 0)
-        label.Position = UDim2.fromOffset(4, 0)
-        label.Font = Enum.Font.GothamBold
-        label.Text = "✦ MEKI HUB ✦"
-        label.TextSize = 14
-        label.TextColor3 = Color3.fromRGB(255, 255, 255)
-        label.TextStrokeTransparency = 0.7
-        label.Parent = plate
-        local gradient = Instance.new("UIGradient")
-        gradient.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 225, 255)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(235, 245, 255)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 55, 145)),
-        })
-        gradient.Parent = label
-    end)
-end
-
-applyMekiOverheadName(player.Character)
 
 addCleanup(player.CharacterAdded:Connect(function(character)
-	applyMekiOverheadName(character)
 	stopFly()
 	if isNoclip then toggleNoclip(false) end
 	isInfJump = false
@@ -2963,7 +2905,7 @@ local function loadAndIncrementTotalExec()
     end)
     return current
 end
-local totalExecCount = loadAndIncrementTotalExec()
+loadAndIncrementTotalExec()
 
 local function queueMekiOnTeleport()
     local url = tostring(MEKI_CONFIG.AUTO_EXEC_SCRIPT_URL or "")
