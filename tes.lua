@@ -1275,17 +1275,16 @@ function Lib:CreateWindow(cfg)
 	return Window
 end
 
--- MEKI HUB x OYB0 KEY SYSTEM (LOOTLABS + PLATOBOOST)
--- Isi token LootLabs dan PlatoBoost Secret pada konfigurasi di bawah.
+-- MEKI HUB x OYB0 PLATOBOOST KEY SYSTEM
+-- Rotate the PlatoBoost secret in the dashboard before using this build.
 local MEKI_KEY_CONFIG = {
     ServiceId = 36770,
     PlatoSecret = "6b567e13-7831-4096-9845-2992e72bd7af",
-    LootLabsToken = "f1224022db4c9b7819e6e85eb0c6e5661c5d3cbd18d7716abf866e1d28f2bcee",
-    LootLabsTitle = "MEKI HUB KEY",
-    LootLabsTier = 1, -- 1 sampai 4
-    LootLabsTasks = 1, -- 1 sampai 5
-    LootLabsTheme = 1, -- 1 sampai 5
+    Secret = "MEKI_HUB_ACCESS_2026"
     KeyFileName = "meki_hub_key.dat",
+    ShowDiscord = false,
+    ShowInstagram = false,
+    ShowYoutube = false,
 }
 
 local mekiHttpRequest = request or http_request or syn_request or (http and http.request)
@@ -1390,44 +1389,8 @@ local function mekiConnectivity()
     end
     return response ~= nil
 end
-local function mekiCreateLootLabsLink(destinationUrl)
-    if MEKI_KEY_CONFIG.LootLabsToken == "PUT_LOOTLABS_API_TOKEN_HERE" or MEKI_KEY_CONFIG.LootLabsToken == "" then
-        return false, "Isi LootLabsToken dari dashboard LootLabs terlebih dahulu"
-    end
-    local payload = {
-        title = MEKI_KEY_CONFIG.LootLabsTitle,
-        url = destinationUrl,
-        tier_id = MEKI_KEY_CONFIG.LootLabsTier,
-        number_of_tasks = MEKI_KEY_CONFIG.LootLabsTasks,
-        theme = MEKI_KEY_CONFIG.LootLabsTheme,
-    }
-    local response, err = mekiRequest({
-        Url = "https://creators.lootlabs.gg/api/public/content_locker",
-        Method = "POST",
-        Headers = {
-            ["Content-Type"] = "application/json",
-            ["Authorization"] = "Bearer " .. MEKI_KEY_CONFIG.LootLabsToken,
-        },
-        Body = mekiJsonEncode(payload),
-    })
-    if not response then return false, err or "LootLabs tidak dapat dihubungi" end
-    if response.StatusCode ~= 200 and response.StatusCode ~= 201 then
-        return false, "LootLabs API error: " .. tostring(response.StatusCode) .. " - " .. tostring(response.Body)
-    end
-    local ok, decoded = pcall(mekiJsonDecode, response.Body)
-    if not ok or type(decoded) ~= "table" or decoded.type == "error" then
-        return false, (decoded and decoded.message) or "Respons LootLabs tidak valid"
-    end
-    local message = decoded.message
-    local lootUrl = type(message) == "table" and (message.loot_url or message.url) or nil
-    if type(lootUrl) ~= "string" or lootUrl == "" then
-        return false, "LootLabs tidak mengembalikan URL monetisasi"
-    end
-    return true, lootUrl
-end
-
 local function mekiCacheLink()
-    if MEKI_KEY_CONFIG.PlatoSecret == "PUT_NEW_ROTATED_PLATO_SECRET_HERE" then
+    if MEKI_KEY_CONFIG.PlatoSecret == "PUT_YOUR_PLATOBOOST_SECRET_HERE" then
         return false, "Isi PlatoSecret baru di konfigurasi script terlebih dahulu"
     end
     if mekiCachedAt + 600 < os.time() or mekiCachedLink == "" then
@@ -1452,7 +1415,7 @@ end
 local function mekiRedeemKey(key)
     if mekiRequestBusy then return false, "Permintaan sedang diproses, tunggu sebentar" end
     if type(key) ~= "string" or key:gsub("%s+", "") == "" then return false, "Masukkan key terlebih dahulu" end
-    if MEKI_KEY_CONFIG.PlatoSecret == "PUT_NEW_ROTATED_PLATO_SECRET_HERE" then
+    if MEKI_KEY_CONFIG.PlatoSecret == "PUT_YOUR_PLATOBOOST_SECRET_HERE" then
         return false, "Isi PlatoSecret baru di konfigurasi script terlebih dahulu"
     end
     if not mekiConnectivity() then return false, "Tidak dapat terhubung ke PlatoBoost" end
@@ -1483,7 +1446,7 @@ end
 local function mekiVerifyKey(key)
     if mekiRequestBusy then return false, "Permintaan sedang diproses, tunggu sebentar" end
     if type(key) ~= "string" or key:gsub("%s+", "") == "" then return false, "Masukkan key terlebih dahulu" end
-    if MEKI_KEY_CONFIG.PlatoSecret == "PUT_NEW_ROTATED_PLATO_SECRET_HERE" then
+    if MEKI_KEY_CONFIG.PlatoSecret == "PUT_YOUR_PLATOBOOST_SECRET_HERE" then
         return false, "Isi PlatoSecret baru di konfigurasi script terlebih dahulu"
     end
     if not mekiConnectivity() then return false, "Tidak dapat terhubung ke PlatoBoost" end
@@ -1660,6 +1623,7 @@ task.spawn(function()
     if savedMekiKey then
         local verifyOk, verifyResult = pcall(mekiVerifyKey, savedMekiKey)
         savedKeyValid = verifyOk and verifyResult == true
+        if savedKeyValid then _G[MEKI_KEY_CONFIG.Secret] = true end
     end
     if not savedKeyValid then
         local gate = new("Frame", {Size=UDim2.fromScale(1,1), BackgroundColor3=T.Bg, BackgroundTransparency=0.04, ZIndex=300}, gui)
@@ -1708,25 +1672,18 @@ task.spawn(function()
             status.TextColor3 = T.SubText
             get.Active = false
             task.spawn(function()
-                local ok, platoLink = mekiCacheLink()
-                local link, linkError = nil, nil
-                if ok then
-                    local lootOk, lootResult = mekiCreateLootLabsLink(platoLink)
-                    if lootOk then link = lootResult else linkError = lootResult end
-                else
-                    linkError = platoLink
-                end
+                local ok, link = mekiCacheLink()
                 get.Active = true
-                if link then
+                if ok then
                     pcall(function()
                         local clip = setclipboard or toclipboard
                         if clip then clip(link) end
                     end)
                     pcall(function() game:GetService("GuiService"):OpenBrowserWindow(link) end)
-                    status.Text = "●  LOOTLABS LINK COPIED / OPENING..."
+                    status.Text = "●  KEY LINK COPIED / OPENING..."
                     status.TextColor3 = T.Success
                 else
-                    status.Text = "●  " .. tostring(linkError)
+                    status.Text = "●  " .. tostring(link)
                     status.TextColor3 = T.Danger
                 end
             end)
@@ -1741,6 +1698,7 @@ task.spawn(function()
                 local callOk, valid, message = pcall(mekiVerifyKey, enteredKey)
                 submit.Active = true
                 if callOk and valid then
+                    _G[MEKI_KEY_CONFIG.Secret] = true
                     status.Text = "●  KEY VERIFIED. LOADING HUB..."
                     status.TextColor3 = T.Success
                     task.wait(0.35)
