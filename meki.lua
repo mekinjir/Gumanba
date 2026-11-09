@@ -2454,6 +2454,7 @@ renderLists = function()
 end
 
 local stopSummitAnim -- [fix] forward declare, dipakai MekiHub_Cleanup
+local REC, AW -- tab references dipakai lagi di scope utama untuk membangun UI Record/Auto Walk
 do -- [fix] blok teleport/summit (kurangi local di level atas)
 -- Auto Summit map validation uses Roblox PlaceId (game.PlaceId), not UniverseId.
 -- Supported PlaceIds supplied by the user:
@@ -2583,8 +2584,8 @@ end
 
 local TPT = Window:CreateTab("Teleports", "flag")
 -- Record dan Auto Walk ditempatkan tepat di bawah Teleports.
-local REC = Window:CreateTab("Record", "record")
-local AW = Window:CreateTab("Auto Walk", "route")
+REC = Window:CreateTab("Record", "record")
+AW = Window:CreateTab("Auto Walk", "route")
 local selectedMap
 local summitRun = 0
 local summitToggle
