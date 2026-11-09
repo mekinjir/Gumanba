@@ -318,6 +318,20 @@ local function makeIcon(kind, parent)
 	elseif kind == "flag" then
 		box(4, 1, 2, 16)
 		box(6, 2, 9, 7, 1)
+	elseif kind == "record" then
+		local outer = new("Frame", {
+			Position = UDim2.fromOffset(1, 1), Size = UDim2.fromOffset(16, 16),
+			BackgroundTransparency = 1, BorderSizePixel = 0,
+		}, holder)
+		round(outer, 9)
+		local st = new("UIStroke", { Color = T.SubText, Thickness = 2 }, outer)
+		table.insert(strokes, st)
+		box(6, 6, 6, 6, 4)
+	elseif kind == "route" then
+		box(2, 2, 5, 5, 3)
+		box(11, 11, 5, 5, 3)
+		box(7, 4, 7, 2, 1, 45)
+		box(5, 10, 7, 2, 1, 45)
 	elseif kind == "gear" then
 		local ring = new("Frame", {
 			Position = UDim2.fromOffset(4, 4), Size = UDim2.fromOffset(10, 10),
@@ -828,6 +842,21 @@ function Lib:CreateWindow(cfg)
 				if o.Callback then safe(o.Callback) end
 			end)
 			return b
+		end
+
+		function Tab:CreateActionRow(o)
+			local holder = new("Frame", { Size = UDim2.new(1, 0, 0, 34), BackgroundTransparency = 1, LayoutOrder = nextOrder() }, page)
+			local layout = new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder }, holder)
+			local buttons = {}
+			for i, item in ipairs(o or {}) do
+				local bg = item.Danger and T.Danger or T.Panel
+				local btn = new("TextButton", { Size = UDim2.new(1 / #o, -((#o - 1) * 6 / #o), 1, 0), BackgroundColor3 = bg, BorderSizePixel = 0, Text = item.Text or "Aksi", TextColor3 = T.Text, Font = FONTB, TextSize = 11, AutoButtonColor = true, LayoutOrder = i }, holder)
+				round(btn, 7)
+				if not item.Danger then outline(btn, T.Stroke, 1, 0.5) end
+				btn.MouseButton1Click:Connect(function() if item.Callback then safe(item.Callback) end end)
+				table.insert(buttons, btn)
+			end
+			return holder, buttons
 		end
 
 		function Tab:CreateToggle(o)
@@ -2553,6 +2582,9 @@ for _, m in ipairs(TELEPORT_MAPS) do
 end
 
 local TPT = Window:CreateTab("Teleports", "flag")
+-- Record dan Auto Walk ditempatkan tepat di bawah Teleports.
+local REC = Window:CreateTab("Record", "record")
+local AW = Window:CreateTab("Auto Walk", "route")
 local selectedMap
 local summitRun = 0
 local summitToggle
@@ -3332,11 +3364,12 @@ do
 	ensureRecordFolder()
 
 	local recordStatusLabel, recordListLabel
+	local refreshRecordNames
 	local recordFrames = {}
 	local recording, recordPaused = false, false
 	local recordStart, recordPausedTotal, recordPauseAt, lastSample = 0, 0, 0, 0
 	local playbackFrames = {}
-	local playing, playPaused = false, false
+	local playing, playPaused, playStopped = false, false, false
 	local playStart, playPausedTotal, playPauseAt = 0, 0, 0
 	local playConnection, walkTrack
 
@@ -3389,13 +3422,6 @@ do
 			end
 		end
 		table.sort(names)
-		return names
-	end
-	local function refreshRecordNames()
-		local names = listRecordNames()
-		if recordListLabel then
-			recordListLabel.Text = #names > 0 and ("Rekaman map ini: " .. table.concat(names, ", ")) or "Belum ada rekaman untuk map ini."
-		end
 		return names
 	end
 	local function startRecording()
@@ -3458,9 +3484,19 @@ do
 		recordFrames = {}
 	end
 	local function stopPlayback()
-		playing, playPaused = false, false
+		playing, playPaused, playStopped = false, false, true
 		if playConnection then playConnection:Disconnect(); playConnection = nil end
 		stopWalkAnim()
+	end
+	local function nearestFrameIndex(frames)
+		local _, hrp = currentCharacter()
+		if not hrp or type(frames) ~= "table" or #frames == 0 then return 1 end
+		local bestIndex, bestDistance = 1, math.huge
+		for i, frame in ipairs(frames) do
+			local distance = (hrp.Position - frame.cf.Position).Magnitude
+			if distance < bestDistance then bestDistance, bestIndex = distance, i end
+		end
+		return bestIndex
 	end
 	local function loadPlayback(name)
 		if not canRecordFiles then return false, "File I/O tidak didukung" end
@@ -3482,21 +3518,22 @@ do
 		table.sort(frames, function(a, b) return a.t < b.t end)
 		return true, frames
 	end
-	local function startPlayback(name)
+	local function startPlayback(name, continueFromNearest)
 		if recording then return false, "Simpan atau hentikan rekaman dulu" end
 		local ok, result = loadPlayback(name)
 		if not ok then return false, result end
 		stopPlayback()
 		playbackFrames = result
-		playStart, playPausedTotal = tick(), 0
-		playing, playPaused = true, false
+		local startIndex = continueFromNearest and nearestFrameIndex(playbackFrames) or 1
+		playStart, playPausedTotal = tick() - playbackFrames[startIndex].t, 0
+		playing, playPaused, playStopped = true, false, false
 		playWalkAnim()
 		playConnection = RunService.Heartbeat:Connect(function()
 			if not playing or playPaused or isCleaningUp then return end
 			local _, hrp = currentCharacter()
 			if not hrp then stopPlayback(); return end
 			local elapsed = tick() - playStart - playPausedTotal
-			local first, last = playbackFrames[1], playbackFrames[#playbackFrames]
+			local last = playbackFrames[#playbackFrames]
 			if elapsed >= last.t then
 				hrp.CFrame = last.cf
 				stopPlayback()
@@ -3510,7 +3547,7 @@ do
 			local alpha = (b.t > a.t) and math.clamp((elapsed - a.t) / (b.t - a.t), 0, 1) or 1
 			hrp.CFrame = a.cf:Lerp(b.cf, alpha)
 		end)
-		recorderStatus("Status: PLAYBACK - " .. sanitizeName(name))
+		recorderStatus(continueFromNearest and "Status: LANJUT DARI POSISI TERDEKAT" or ("Status: PLAYBACK - " .. sanitizeName(name)))
 		return true
 	end
 	local function togglePlaybackPause()
@@ -3529,48 +3566,57 @@ do
 		return true
 	end
 
-	local REC = Window:CreateTab("Record", "play")
 	REC:CreateSection("WALK RECORDER")
 	recordStatusLabel = REC:CreateLabel("Status: Siap")
-	REC:CreateLabel("Rekam jalur karakter, pause bila perlu, lalu simpan sebagai file JSON. Kamera tidak disentuh.")
-	local recordNameBox = REC:CreateInput({ Placeholder = "Nama rekaman (contoh: rute1)" })
+	REC:CreateLabel("Rekam jalur karakter, simpan, lalu kelola rekaman dari daftar map yang sesuai.")
+	local recordNameBox = REC:CreateInput({ Placeholder = "Nama rekaman baru" })
 	REC:CreateButton({ Name = "● MULAI REKAM", Accent = true, Callback = startRecording })
 	REC:CreateButton({ Name = "PAUSE / RESUME REKAM", Callback = toggleRecordPause })
-	REC:CreateButton({ Name = "■ SIMPAN REKAMAN", Callback = function() saveRecording(recordNameBox.Text) end })
-	REC:CreateSection("PLAYBACK REKAMAN")
-	local playbackNameBox = REC:CreateInput({ Placeholder = "Nama file untuk playback / rename / delete" })
-	recordListLabel = REC:CreateLabel("Memuat daftar rekaman...")
-	REC:CreateButton({ Name = "REFRESH DAFTAR", Callback = refreshRecordNames })
-	REC:CreateButton({ Name = "▶ PLAY REKAMAN", Accent = true, Callback = function()
-		local ok, err = startPlayback(playbackNameBox.Text)
-		if not ok then Window:Notify("Playback", err, 3, "error") end
-	end })
-	REC:CreateButton({ Name = "PAUSE / RESUME PLAYBACK", Callback = function()
-		local ok, err = togglePlaybackPause()
-		if not ok then Window:Notify("Playback", err, 2, "error") end
-	end })
-	REC:CreateButton({ Name = "■ STOP PLAYBACK", Danger = true, Callback = function()
-		stopPlayback(); recorderStatus("Status: Playback berhenti")
-	end })
-	REC:CreateButton({ Name = "RENAME REKAMAN", Callback = function()
-		if not canRecordFiles then return end
-		local oldName = sanitizeName(playbackNameBox.Text)
-		local newName = sanitizeName(recordNameBox.Text)
-		if oldName == "" or newName == "" then Window:Notify("Rename", "Isi nama lama dan nama baru", 2, "error"); return end
-		local oldPath, newPath = RECORD_FOLDER .. "/" .. oldName .. ".json", RECORD_FOLDER .. "/" .. newName .. ".json"
-		if not isfile(oldPath) then Window:Notify("Rename", "File lama tidak ditemukan", 2, "error"); return end
-		local ok, err = pcall(function() writefile(newPath, readfile(oldPath)); delfile(oldPath) end)
-		if ok then Window:Notify("Rename", "Berhasil rename", 2, "success"); refreshRecordNames() else Window:Notify("Rename", tostring(err), 3, "error") end
-	end })
-	REC:CreateButton({ Name = "HAPUS REKAMAN", Danger = true, Callback = function()
-		if not canRecordFiles or type(delfile) ~= "function" then Window:Notify("Hapus", "Executor tidak mendukung delfile", 2, "error"); return end
-		local name = sanitizeName(playbackNameBox.Text)
-		local path = RECORD_FOLDER .. "/" .. name .. ".json"
-		if name == "" or not isfile(path) then Window:Notify("Hapus", "File tidak ditemukan", 2, "error"); return end
-		local ok = pcall(delfile, path)
-		Window:Notify("Hapus", ok and "Rekaman dihapus" or "Gagal menghapus", 2, ok and "success" or "error")
-		refreshRecordNames()
-	end })
+	REC:CreateButton({ Name = "■ STOP & SIMPAN REKAMAN", Danger = true, Callback = function() saveRecording(recordNameBox.Text) end })
+	REC:CreateSection("HASIL REKAMAN • MAP INI")
+	local recordCards = {}
+	refreshRecordNames = function()
+		for _, card in ipairs(recordCards) do pcall(function() card:Destroy() end) end
+		table.clear(recordCards)
+		local names = listRecordNames()
+		if #names == 0 then
+			table.insert(recordCards, REC:CreateLabel("Belum ada rekaman untuk map ini."))
+			return names
+		end
+		for _, name in ipairs(names) do
+			local title = REC:CreateLabel("▰  " .. name)
+			table.insert(recordCards, title)
+			local row = REC:CreateActionRow({
+				{ Text = "▶ PLAY", Callback = function()
+					local ok, err = startPlayback(name, false)
+					if not ok then Window:Notify("Playback", err, 3, "error") end
+				end },
+				{ Text = "■ STOP", Danger = true, Callback = function()
+					if playing then stopPlayback(); recorderStatus("Status: Playback dihentikan — siap dilanjutkan") end
+				end },
+				{ Text = "↻ LANJUT", Callback = function()
+					local ok, err = startPlayback(name, true)
+					if not ok then Window:Notify("Playback", err, 3, "error") end
+				end },
+				{ Text = "✎", Callback = function()
+					local newName = sanitizeName(recordNameBox.Text)
+					if newName == "" then Window:Notify("Rename", "Isi nama baru di kolom atas", 2, "error"); return end
+					local oldPath, newPath = RECORD_FOLDER .. "/" .. name .. ".json", RECORD_FOLDER .. "/" .. newName .. ".json"
+					if isfile(newPath) then Window:Notify("Rename", "Nama tersebut sudah dipakai", 2, "error"); return end
+					local ok, err = pcall(function() writefile(newPath, readfile(oldPath)); delfile(oldPath) end)
+					if ok then Window:Notify("Rename", "Berhasil rename", 2, "success"); refreshRecordNames() else Window:Notify("Rename", tostring(err), 3, "error") end
+				end },
+				{ Text = "⌫", Danger = true, Callback = function()
+					local path = RECORD_FOLDER .. "/" .. name .. ".json"
+					if type(delfile) ~= "function" then Window:Notify("Hapus", "Executor tidak mendukung delfile", 2, "error"); return end
+					local ok = pcall(delfile, path)
+					Window:Notify("Hapus", ok and "Rekaman dihapus" or "Gagal menghapus", 2, ok and "success" or "error")
+					refreshRecordNames()
+				end },
+			})
+			table.insert(recordCards, row)
+		end
+	end
 	refreshRecordNames()
 
 	addCleanup(RunService.Heartbeat:Connect(function()
@@ -3614,10 +3660,8 @@ do
 	local cymoraUnlocked = cymoraData ~= nil and cymoraFetchError == nil and cymoraMapId ~= nil
 		and tonumber(game.PlaceId) == cymoraMapId
 
-	local AW = Window:CreateTab("Auto Walk", "route")
 	AW:CreateSection("MOUNT CYMORA")
 	AW:CreateLabel(cymoraUnlocked and "Map terdeteksi: MOUNT CYMORA" or "🔒 Auto Walk hanya bisa digunakan di MOUNT CYMORA")
-	AW:CreateLabel("Sumber jalur: GitHub / mekinjir / auto-walk / cymoraa.json")
 	local cymoraMapDropdown = AW:CreateDropdown({
 		Options = { "MOUNT CYMORA" },
 		Default = cymoraUnlocked and "MOUNT CYMORA" or nil,
@@ -3630,7 +3674,9 @@ do
 		end,
 	})
 	local autoWalkToggle
-	AW:CreateLabel(cymoraFetchError and ("Status data: " .. cymoraFetchError) or ("PlaceId jalur: " .. tostring(cymoraMapId or "tidak ada")))
+	local autoWalkResume = false
+	local autoWalkActionButton
+	local autoWalkStatusLabel = AW:CreateLabel(cymoraUnlocked and "Rute Mount Cymora siap digunakan." or "Rute terkunci atau gagal dimuat.")
 	autoWalkToggle = AW:CreateToggle({
 		Name = cymoraUnlocked and "Auto Walk Mount Cymora" or "🔒 Auto Walk (Terkunci)",
 		Flag = "autoWalkCymora",
@@ -3651,8 +3697,10 @@ do
 			table.sort(frames, function(a, b) return a.t < b.t end)
 			stopPlayback()
 			playbackFrames = frames
-			playStart, playPausedTotal = tick(), 0
-			playing, playPaused = true, false
+			local startIndex = autoWalkResume and nearestFrameIndex(playbackFrames) or 1
+			playStart, playPausedTotal = tick() - playbackFrames[startIndex].t, 0
+			playing, playPaused, playStopped = true, false, false
+			autoWalkResume = false
 			playWalkAnim()
 			playConnection = RunService.Heartbeat:Connect(function()
 				if not playing or playPaused or isCleaningUp then return end
@@ -3664,6 +3712,8 @@ do
 					hrp.CFrame = last.cf
 					stopPlayback()
 					if autoWalkToggle then autoWalkToggle:Set(false, true) end
+					autoWalkResume = false
+					autoWalkActionButton.Text = "■ STOP AUTO WALK"
 					Window:Notify("Auto Walk", "Rute Mount Cymora selesai", 2, "success")
 					return
 				end
@@ -3676,10 +3726,23 @@ do
 			return true
 		end,
 	})
-	AW:CreateButton({ Name = "STOP AUTO WALK", Danger = true, Callback = function()
-		stopPlayback()
-		if autoWalkToggle then autoWalkToggle:Set(false, true) end
-		Window:Notify("Auto Walk", "Dihentikan", 1.5)
+	autoWalkActionButton = AW:CreateButton({ Name = "■ STOP AUTO WALK", Danger = true, Callback = function()
+		if playing then
+			stopPlayback()
+			autoWalkResume = true
+			autoWalkActionButton.Text = "↻ LANJUTKAN WALK"
+			autoWalkActionButton.Parent.BackgroundColor3 = T.Panel
+			Window:Notify("Auto Walk", "Berhenti sementara — tekan lanjutkan untuk meneruskan dari titik terdekat", 2.5)
+		else
+			if not autoWalkResume then
+				Window:Notify("Auto Walk", "Tidak ada jalur yang dihentikan", 1.5, "error")
+				return
+			end
+			if autoWalkToggle then autoWalkToggle:Set(true, true) end
+			local ok, err = autoWalkToggle and autoWalkToggle:Set(true)
+			if err then Window:Notify("Auto Walk", tostring(err), 2, "error") end
+			autoWalkActionButton.Text = "■ STOP AUTO WALK"
+		end
 	end })
 
 	env.MekiHub_WalkCleanup = function()
