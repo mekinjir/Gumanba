@@ -3349,7 +3349,7 @@ local function serverHop()
 end
 
 -- ===== MEKI HUB: WALK RECORDER + AUTO WALK (MOUNT CYMORA) =====
-do
+local _walkUiOk, _walkUiErr = pcall(function()
 	local RECORD_FOLDER = "MekiHubRecordings"
 	local AUTO_WALK_URL = "https://raw.githubusercontent.com/mekinjir/auto-walk/refs/heads/main/cymoraa.json"
 	local CURRENT_MAP_ID = tostring(game.PlaceId)
@@ -3713,7 +3713,7 @@ do
 					stopPlayback()
 					if autoWalkToggle then autoWalkToggle:Set(false, true) end
 					autoWalkResume = false
-					autoWalkActionButton.Text = "■ STOP AUTO WALK"
+					if autoWalkActionButton then autoWalkActionButton.Text = "■ STOP AUTO WALK" end
 					Window:Notify("Auto Walk", "Rute Mount Cymora selesai", 2, "success")
 					return
 				end
@@ -3730,7 +3730,7 @@ do
 		if playing then
 			stopPlayback()
 			autoWalkResume = true
-			autoWalkActionButton.Text = "↻ LANJUTKAN WALK"
+			if autoWalkActionButton then autoWalkActionButton.Text = "↻ LANJUTKAN WALK" end
 			autoWalkActionButton.Parent.BackgroundColor3 = T.Panel
 			Window:Notify("Auto Walk", "Berhenti sementara — tekan lanjutkan untuk meneruskan dari titik terdekat", 2.5)
 		else
@@ -3738,10 +3738,10 @@ do
 				Window:Notify("Auto Walk", "Tidak ada jalur yang dihentikan", 1.5, "error")
 				return
 			end
-			if autoWalkToggle then autoWalkToggle:Set(true, true) end
-			local ok, err = autoWalkToggle and autoWalkToggle:Set(true)
-			if err then Window:Notify("Auto Walk", tostring(err), 2, "error") end
-			autoWalkActionButton.Text = "■ STOP AUTO WALK"
+			if autoWalkToggle then
+				autoWalkToggle:Set(true)
+			end
+			if autoWalkActionButton then autoWalkActionButton.Text = "■ STOP AUTO WALK" end
 		end
 	end })
 
@@ -3749,8 +3749,15 @@ do
 		recording, recordPaused = false, false
 		stopPlayback()
 	end
-end
+end)
 
+if not _walkUiOk then
+	warn("[MEKI HUB] Record/Auto Walk UI error: " .. tostring(_walkUiErr))
+	pcall(function() REC:CreateSection("WALK RECORDER") end)
+	pcall(function() REC:CreateLabel("UI gagal dimuat. Coba re-execute hub.") end)
+	pcall(function() AW:CreateSection("AUTO WALK") end)
+	pcall(function() AW:CreateLabel("UI gagal dimuat. Coba re-execute hub.") end)
+end
 
 local CF = Window:CreateTab("Config", "gear")
 
